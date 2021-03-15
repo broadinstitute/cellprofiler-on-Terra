@@ -10,12 +10,12 @@ import "https://api.firecloud.org/ga4gh/v1/tools/bayer-pcl-imaging%3Acellprofile
 
 task cellprofiler_pipeline_task {
 
-
   input {
 
     # File-related inputs
     String experiment_name
     Array[File] input_files
+    String? file_extension = ".tiff"
 
     # Pipeline specification
     File cppipe_file
@@ -46,7 +46,8 @@ task cellprofiler_pipeline_task {
 
   output {
     File cellprofiler_log = read_lines(stdout())
-    Array[File] output_file_array = glob("${experiment_name}_out*.tiff")  # find the output files
+    Array[File] output_image_array = glob("output/*${file_extension}")  # find the output files
+    Array[File] output_csv_array = glob("output/*.csv")
   }
 
   runtime {
@@ -85,10 +86,12 @@ workflow cellprofiler_pipeline {
     input:
       input_files=directory.file_array,  # from util.gsutil_ls task
       experiment_name=experiment_name,
+      file_extension=file_extension,
   }
 
   output {
-    Array[File] h5_array = cellprofiler_pipeline_task.output_file_array
+    Array[File] output_images = cellprofiler_pipeline_task.output_image_array
+    Array[File] output_csvs = cellprofiler_pipeline_task.output_csv_array
   }
 
 }
