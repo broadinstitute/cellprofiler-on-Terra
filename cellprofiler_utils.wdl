@@ -52,11 +52,11 @@ task cellprofiler_pipeline_task {
     cromwell_image_dir=$(dirname ~{input_files[0]})
 
     # for logging purposes, print some information
-    echo "\nDirectory containing load_data.csv ============================="
+    echo "Directory containing load_data.csv ============================="
     echo $csv_dir
     ls -lah $csv_dir
 
-    echo "\nDirectory of images (determined by Cromwell) ==================="
+    echo "Directory of images (determined by Cromwell) ==================="
     echo $cromwell_image_dir
     ls -lah $cromwell_image_dir
 
@@ -64,7 +64,7 @@ task cellprofiler_pipeline_task {
     mkdir ~{input_image_dir}
     mv $cromwell_image_dir/* ~{input_image_dir}
 
-    echo "\nDirectory where we moved the images ============================"
+    echo "Directory where we moved the images ============================"
     echo ~{input_image_dir}
     ls -lah ~{input_image_dir}
 
@@ -78,12 +78,12 @@ task cellprofiler_pipeline_task {
       -i $csv_dir
 
     # make the outputs into a tarball (hack to delocalize arbitrary outputs)
-    echo "\nDirectory containing output files =============================="
+    echo "Directory containing output files =============================="
     cd output
     ls -lah .
     tar -zcvf ../~{tarball_name} .
     cd ..
-    echo "\nDirectory containing output tarball ============================"
+    echo "Directory containing output tarball ============================"
     ls -lah
 
   }
@@ -227,12 +227,11 @@ task generate_load_data_csv {
     # Input files
     File xml_file
     File config_yaml
-#    Array[String] image_filename_array  # TODO is this necessary?
+    Array[String] image_filename_array
     File python_script
 
     # Docker image
-    # TODO: replace this -- we need python3 and relevant packages
-    String? docker_image = "us.gcr.io/broad-dsde-methods/google-cloud-sdk:alpine"
+    String? docker_image = "python:3.9.1-buster"
 
     # Hardware-related inputs
     Int? hardware_disk_size_GB = 50
@@ -243,8 +242,28 @@ task generate_load_data_csv {
   }
 
   command {
-    # TODO: fill in... probably this will amount to running a single python script
-    python ~{python_script} --index-file ~{xml_file} ~{config_yaml} ~{output_filename}
+
+    pip install pyyaml ipython
+
+    # get the XML directory
+    xml_dir=$(dirname ~{xml_file})
+
+    # create dummy image files based on their names
+    for filename in ~{sep=" " image_filename_array} ;
+    do
+        tmp_filename=$(basename $filename)
+        touch $xml_dir/$tmp_filename
+    done
+
+    echo "Directory with XML file ========================"
+    ls -lah $xml_dir
+
+    # run the script
+    python ~{python_script} --index-directory $xml_dir ~{config_yaml} ~{output_filename}
+
+    # view the output
+    echo "Output CSV file ================================"
+    cat ~{output_filename}
   }
 
   output {

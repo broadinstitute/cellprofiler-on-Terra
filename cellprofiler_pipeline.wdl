@@ -1,6 +1,6 @@
 version 1.0
 
-import "https://api.firecloud.org/ga4gh/v1/tools/bayer-pcl-cell-imaging%3Acellprofiler_utils/versions/5/plain-WDL/descriptor" as util
+import "https://api.firecloud.org/ga4gh/v1/tools/bayer-pcl-cell-imaging%3Acellprofiler_utils/versions/6/plain-WDL/descriptor" as util
 
 ## Copyright Broad Institute, 2021
 ##
@@ -19,8 +19,8 @@ workflow cellprofiler_pipeline {
     # And the desired location of the outputs (optional)
     String output_directory_gsurl = ""
 
-    # load_data.csv as an input for now
-    String load_data_csv
+    # The XML file from the microscope
+    String xml_file
 
   }
 
@@ -31,17 +31,18 @@ workflow cellprofiler_pipeline {
       file_extension=file_extension,
   }
 
-#  # Create the load_data.csv file
-#  call util.generate_load_data_csv as script {
-#    input:
-#      image_filename_array=directory.file_array,  # from util.gsutil_ls task
-#  }
+  # Create the load_data.csv file
+  call util.generate_load_data_csv as script {
+    input:
+      image_filename_array=directory.file_array,  # from util.gsutil_ls task
+      xml_file=xml_file,
+  }
 
   # Run CellProfiler pipeline
   call util.cellprofiler_pipeline_task as cellprofiler {
     input:
       input_files=directory.file_array,  # from util.gsutil_ls task
-      load_data_csv=load_data_csv,
+      load_data_csv=script.load_data_csv,
   }
 
   # Optionally delocalize outputs
