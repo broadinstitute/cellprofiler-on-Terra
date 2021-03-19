@@ -14,11 +14,7 @@ task cellprofiler_pipeline_task {
 
     # File-related inputs
     Array[File] input_files
-    String? file_extension = ".tiff"
     File load_data_csv
-
-    # Desired bucket location for outputs
-    String output_directory_gsurl
 
     # Pipeline specification
     File cppipe_file
@@ -31,10 +27,12 @@ task cellprofiler_pipeline_task {
     Int? hardware_disk_size_GB = 500
     Int? hardware_memory_GB = 16
     Int? hardware_cpu_count = 4
-    String? hardware_zones = ""
     Int? hardware_preemptible_tries = 1
 
     String tarball_name = "outputs.tar.gz"
+
+    # NOTE: load_data.csv must specify that all the images are in /data
+    String input_image_dir = "/data"
 
   }
 
@@ -44,12 +42,31 @@ task cellprofiler_pipeline_task {
     #       specific files that are not passed as inputs at the command line:
     #       the "load_data.csv" file is one such file.
 
-    # locate the image file directory locally
-    input_dir=$(dirname ~{input_files[0]})
+    # errors should cause the task to fail, not produce an empty output
+    set -e
 
-    # for logging purposes, print the file information
-    echo $input_dir
-    ls -lah $input_dir
+    # locate the load_csv file directory locally
+    csv_dir=$(dirname ~{load_data_csv})
+
+    # locate the directory with images
+    cromwell_image_dir=$(dirname ~{input_files[0]})
+
+    # for logging purposes, print some information
+    echo "\nDirectory containing load_data.csv ============================="
+    echo $csv_dir
+    ls -lah $csv_dir
+
+    echo "\nDirectory of images (determined by Cromwell) ==================="
+    echo $cromwell_image_dir
+    ls -lah $cromwell_image_dir
+
+    # move the images to a precisely-known path
+    mkdir ~{input_image_dir}
+    mv $cromwell_image_dir/* ~{input_image_dir}
+
+    echo "\nDirectory where we moved the images ============================"
+    echo ~{input_image_dir}
+    ls -lah ~{input_image_dir}
 
     # make a directory to contain the outputs
     mkdir output
@@ -58,19 +75,21 @@ task cellprofiler_pipeline_task {
     cellprofiler --run --run-headless \
       -p ~{cppipe_file}  \
       -o output \
-      -i $input_dir
+      -i $csv_dir
 
     # make the outputs into a tarball (hack to delocalize arbitrary outputs)
+    echo "\nDirectory containing output files =============================="
     cd output
     ls -lah .
     tar -zcvf ../~{tarball_name} .
     cd ..
+    echo "\nDirectory containing output tarball ============================"
     ls -lah
 
   }
 
   output {
-    File log = read_lines(stdout())
+    File log = stdout()
     File tarball = "${tarball_name}"
   }
 
@@ -80,7 +99,6 @@ task cellprofiler_pipeline_task {
     disks: "local-disk ${hardware_disk_size_GB} HDD"
     memory: "${hardware_memory_GB}G"
     cpu: hardware_cpu_count
-    zones: "${hardware_zones}"
     preemptible: hardware_preemptible_tries
   }
 

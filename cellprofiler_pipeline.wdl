@@ -1,6 +1,6 @@
 version 1.0
 
-import "https://api.firecloud.org/ga4gh/v1/tools/bayer-pcl-imaging%3Acellprofiler_utils/versions/1/plain-WDL/descriptor" as util
+import "https://api.firecloud.org/ga4gh/v1/tools/bayer-pcl-cell-imaging%3Acellprofiler_utils/versions/5/plain-WDL/descriptor" as util
 
 ## Copyright Broad Institute, 2021
 ##
@@ -17,7 +17,10 @@ workflow cellprofiler_pipeline {
     String? file_extension = ".tiff"
 
     # And the desired location of the outputs (optional)
-    String? output_directory_gsurl = ""
+    String output_directory_gsurl = ""
+
+    # load_data.csv as an input for now
+    String load_data_csv
 
   }
 
@@ -28,17 +31,17 @@ workflow cellprofiler_pipeline {
       file_extension=file_extension,
   }
 
-  # Create the load_data.csv file
-  call util.generate_load_data_csv as script {
-    input:
-      image_filename_array=directory.file_array,  # from util.gsutil_ls task
-  }
+#  # Create the load_data.csv file
+#  call util.generate_load_data_csv as script {
+#    input:
+#      image_filename_array=directory.file_array,  # from util.gsutil_ls task
+#  }
 
   # Run CellProfiler pipeline
   call util.cellprofiler_pipeline_task as cellprofiler {
     input:
       input_files=directory.file_array,  # from util.gsutil_ls task
-      file_extension=file_extension,
+      load_data_csv=load_data_csv,
   }
 
   # Optionally delocalize outputs
@@ -51,9 +54,9 @@ workflow cellprofiler_pipeline {
   }
 
   output {
-    Array[File] tarball = cellprofiler.tarball
-    Array[File] log = cellprofiler.log
-    String? output_directory = output_directory_gsurl
+    File tarball = cellprofiler.tarball
+    File log = cellprofiler.log
+    String output_directory = output_directory_gsurl
   }
 
 }
