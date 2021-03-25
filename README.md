@@ -47,9 +47,7 @@ run CellProfiler, the most important of which are
 `cellprofiler.hardware_memory_GB`, which should be tuned to match the 
 computational load being run.
 
-## Utilities
-
-### `cellprofiler_utils.wdl`
+## Utilities: `cellprofiler_utils.wdl`
 
 Several utility functions (WDL "tasks") that are called by WDL workflows.
 
