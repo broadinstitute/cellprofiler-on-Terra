@@ -24,8 +24,8 @@ pipeline
 - `xml_file`: gsURL path to the XML file produced by the microscope
 - `config_yaml`: gsURL path to a `.yaml` file, created by the user, that 
 specifies important metadata about the experiment, including color channels
-- `python_script`: A python3 script that creates a "load_data.csv" file from 
-the `xml_file`, the `config_yaml` file, and a list of the image files
+- `python_script`: gsURL path to a python3 script that creates a "load_data.csv" 
+file from the `xml_file`, the `config_yaml` file, and a list of the image files
 
 #### Optional inputs:
 - `output_directory_gsurl`: If specified as a gsURL path, the output files will 
