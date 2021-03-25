@@ -4,7 +4,7 @@ Run an automated CellProfiler pipeline on Terra.
 
 ## Pipelines
 
-### `cellprofiler_pipeline.wdl`: single VM workflow
+### 1. `cellprofiler_pipeline.wdl`: single VM workflow
 
 See the [single VM workflow here](https://portal.firecloud.org/#methods/bayer-pcl-cell-imaging/cellprofiler_pipeline/)
 
