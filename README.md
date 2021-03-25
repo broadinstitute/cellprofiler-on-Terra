@@ -13,8 +13,9 @@ The pipeline can be specified as usual for a headless CellProfiler run.  Just
 pass the `.cppipe` file and a path to the relevant images in a google bucket, 
 and the workflow will spin up one VM on Google Cloud, per your specifications, 
 and run the CellProfiler pipeline there. Output can either be a tarball 
-(located wherever Terra chooses) or the output files can optionally be extracted 
-and copied to a Google bucket location of choice.
+(called "output.tar.gz", and located wherever Terra chooses) or the output 
+files can optionally be extracted and copied to a Google bucket location of 
+choice (see the optional input `output_directory_gsurl`).
 
 #### Required inputs:
 - `input_directory_gsurl`: gsURL of Google bucket with image files
