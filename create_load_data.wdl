@@ -1,6 +1,6 @@
 version 1.0
 
-import "https://api.firecloud.org/ga4gh/v1/tools/bayer-pcl-cell-imaging:create_load_data_utils/versions/4/plain-WDL/descriptor" as util
+import "https://api.firecloud.org/ga4gh/v1/tools/bayer-pcl-cell-imaging:create_load_data_utils/versions/5/plain-WDL/descriptor" as util
 
 ## Copyright Broad Institute, 2021
 ##
@@ -41,8 +41,8 @@ workflow create_load_data {
       destination_gsurl=images_directory_gsurl,
   }
 
-  # Save load_data_with_illum.csv file
-  call util.gsutil_delocalize {
+  # Save load_data_will_illum.csv file
+  call util.gsutil_delocalize as save_illum{
     input:
       file=script.load_data_with_illum_csv,
       destination_gsurl=images_directory_gsurl,
@@ -50,8 +50,7 @@ workflow create_load_data {
 
   output {
     File load_data_csv = script.load_data_csv
+    File load_data_with_illum_csv = script.load_data_with_illum_csv
   }
 
 }
-
-
