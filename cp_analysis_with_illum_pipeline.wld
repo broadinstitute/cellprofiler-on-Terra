@@ -1,0 +1,61 @@
+version 1.0
+
+import "https://api.firecloud.org/ga4gh/v1/tools/bayer-pcl-cell-imaging:cp_analysis_with_illum_utils/versions/11/plain-WDL/descriptor" as util
+
+## Copyright Broad Institute, 2021
+##
+## LICENSING :
+## This script is released under the WDL source code license (BSD-3)
+## (see LICENSE in https://github.com/openwdl/wdl).
+
+workflow cp_analysis_with_illum_pipeline {
+
+  input {
+
+    # Specify input file information
+    String images_directory_gsurl
+
+    # And the desired location of the outputs
+    String output_directory_gsurl
+
+  }
+
+  # Define the input files, so that we use Cromwell's automatic file localization
+  call util.gsutil_ls as images_directory {
+    input:
+      directory_gsurl = images_directory_gsurl,
+      file_extension = ".tiff",
+  }
+
+  # Define the input files, so that we use Cromwell's automatic file localization
+  call util.gsutil_ls as illum_directory {
+    input:
+      directory_gsurl = "${images_directory_gsurl}/illum",
+      file_extension = ".npy",
+  }
+
+
+  # Run CellProfiler pipeline
+  call util.cellprofiler_pipeline_task as cellprofiler {
+    input:
+      images_files=images_directory.file_array,  # from util.gsutil_ls task
+      illum_files=illum_directory.file_array,  # from util.gsutil_ls task
+      load_data_csv= images_directory_gsurl + "/load_data_with_illum.csv",
+  }
+
+  # Delocalize outputs
+
+  call util.extract_and_gsutil_rsync {
+    input:
+      tarball=cellprofiler.tarball,
+      destination_gsurl=output_directory_gsurl,
+  }
+
+
+#  output {
+#    File tarball = cellprofiler.tarball
+#    File log = cellprofiler.log
+#    String output_directory = output_directory_gsurl
+#  }
+
+}
