@@ -17,13 +17,13 @@ task create_sqlite_and_aggregated_csv {
     String config_ini_file_gsurl
 
     # Desired location of the outputs (optional)
-    String output_directory_gsurl = ""
+    String? output_directory_gsurl = ""
+
+    # Pycytominer aggregation step
+    String? aggregation_operation = "median"
 
     # Docker image
     String? docker_image = "us.gcr.io/broad-dsde-methods/cytomining:0.0.1"
-
-    # Docker image
-    String? aggregation_operation = "median"
 
     # Hardware-related inputs
     Int? hardware_disk_size_GB = 500
@@ -105,6 +105,17 @@ task create_sqlite_and_aggregated_csv {
     echo "Completed pycytominer aggregation"
     echo "ls -lh ."
     ls -lh .
+
+    if [ -z "~{output_directory_gsurl}" ]
+    then
+        echo "No output google bucket specified"
+    else
+        echo "Copying outputs to ~{output_directory_gsurl}"
+        gsutil cp backend.sqlite ~{output_directory_gsurl}
+        gsutil cp ~{output_filename} ~{output_directory_gsurl}
+        gsutil cp monitoring.log ~{output_directory_gsurl}
+    fi
+
     echo "Done."
 
   }
@@ -129,7 +140,6 @@ task create_sqlite_and_aggregated_csv {
 
 workflow cellprofiler_pipeline {
 
-  # Define the input files, so that we use Cromwell's automatic file localization
   call create_sqlite_and_aggregated_csv {}
 
   output {
