@@ -29,6 +29,7 @@ task create_sqlite_and_aggregated_csv {
     Int? hardware_disk_size_GB = 500
     Int? hardware_memory_GB = 15
     Int? hardware_cpu_count = 4
+    Int? hardware_boot_disk_size_GB = 100
 
     String output_filename = "aggregated_" + aggregation_operation + ".csv"
   }
@@ -48,8 +49,8 @@ task create_sqlite_and_aggregated_csv {
 
     # localize the data
     mkdir /data
-    gsutil -m rsync -r ~{cellprofiler_output_directory_gsurl} /data
-    gsutil cp ~{config_ini_file_gsurl} ingest_config.ini
+    gsutil -mq rsync -r -x ".*\.png$" ~{cellprofiler_output_directory_gsurl} /data
+    gsutil -q cp ~{config_ini_file_gsurl} ingest_config.ini
 
     # display for log
     end=`date +%s`
@@ -70,9 +71,9 @@ task create_sqlite_and_aggregated_csv {
 
     # display for log
     echo " "
-    echo "============================================"
-    echo "=    Running cytominer-databse ingest      ="
-    echo "============================================"
+    echo "===================================="
+    echo "= Running cytominer-databse ingest ="
+    echo "===================================="
     start=`date +%s`
     echo $start
     echo "cytominer-database ingest /data sqlite:///backend.sqlite -c ingest_config.ini"
@@ -86,7 +87,7 @@ task create_sqlite_and_aggregated_csv {
     runtime=$((end-start))
     echo "Total runtime for cytominer-database ingest:"
     echo $runtime
-    echo "============================================"
+    echo "===================================="
 
     # run the python code right here for pycytominer aggregation
     echo " "
@@ -131,6 +132,7 @@ task create_sqlite_and_aggregated_csv {
     docker: "${docker_image}"
     disks: "local-disk ${hardware_disk_size_GB} HDD"
     memory: "${hardware_memory_GB}G"
+    bootDiskSizeGb: hardware_boot_disk_size_GB
     cpu: hardware_cpu_count
     maxRetries: 2
   }
@@ -138,7 +140,7 @@ task create_sqlite_and_aggregated_csv {
 }
 
 
-workflow cellprofiler_pipeline {
+workflow cytomining {
 
   call create_sqlite_and_aggregated_csv {}
 
