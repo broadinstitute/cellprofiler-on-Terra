@@ -15,7 +15,8 @@ RUN curl -sSL https://sdk.cloud.google.com | bash
 RUN conda install -y -c conda-forge google-api-python-client oauth2client google-auth \
  google-cloud-sdk google-auth-oauthlib \
  && conda install -y -c anaconda gcc_linux-64 \
- && conda clean -ya
+ && conda clean -ya \
+ && pip install --no-cache-dir -U crcmod
 
 # add a monitoring script
 ADD https://raw.githubusercontent.com/klarman-cell-observatory/cumulus/master/docker/monitor_script.sh \
