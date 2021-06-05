@@ -29,7 +29,7 @@ task create_sqlite_and_aggregated_csv {
     Int? hardware_disk_size_GB = 500
     Int? hardware_memory_GB = 15
     Int? hardware_cpu_count = 4
-    Int? hardware_boot_disk_size_GB = 100
+    Int? hardware_boot_disk_size_GB = 10
 
     String output_filename = "aggregated_" + aggregation_operation + ".csv"
   }
@@ -39,8 +39,8 @@ task create_sqlite_and_aggregated_csv {
     set -e
 
     # run monitoring script
-    mkdir /out
-    cd /out
+    mkdir out
+    cd out
     monitor_script.sh > monitoring.log &
 
     # display for log
@@ -49,8 +49,8 @@ task create_sqlite_and_aggregated_csv {
     echo $start
 
     # localize the data
-    mkdir /data
-    gsutil -mq rsync -r -x ".*\.png$" ~{cellprofiler_output_directory_gsurl} /data
+    mkdir -p /cromwell_root/data
+    gsutil -mq rsync -r -x ".*\.png$" ~{cellprofiler_output_directory_gsurl} /cromwell_root/data
     gsutil -q cp ~{config_ini_file_gsurl} ingest_config.ini
 
     # display for log
@@ -62,8 +62,8 @@ task create_sqlite_and_aggregated_csv {
 
     # display for log
     echo " "
-    echo "ls -lh /data"
-    ls -lh /data
+    echo "ls -lh /cromwell_root/data"
+    ls -lh /cromwell_root/data
 
     # display for log
     echo " "
@@ -77,10 +77,10 @@ task create_sqlite_and_aggregated_csv {
     echo "===================================="
     start=`date +%s`
     echo $start
-    echo "cytominer-database ingest /data sqlite:///backend.sqlite -c ingest_config.ini"
+    echo "cytominer-database ingest /cromwell_root/data sqlite:///backend.sqlite -c ingest_config.ini"
 
     # run the very long SQLite database ingestion code
-    cytominer-database ingest /data sqlite:///backend.sqlite -c ingest_config.ini
+    cytominer-database ingest /cromwell_root/data sqlite:///backend.sqlite -c ingest_config.ini
 
     # display for log
     end=`date +%s`
@@ -123,9 +123,9 @@ task create_sqlite_and_aggregated_csv {
   }
 
   output {
-    File aggregated_csv = "/out/~{output_filename}"
-    File sqlite = "/out/backend.sqlite"
-    File monitoring_log = "/out/monitoring.log"
+    File aggregated_csv = "~{output_filename}"
+    File sqlite = "backend.sqlite"
+    File monitoring_log = "monitoring.log"
     File log = stdout()
   }
 
