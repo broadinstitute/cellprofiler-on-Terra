@@ -39,11 +39,12 @@ task create_sqlite_and_aggregated_csv {
     set -e
 
     # run monitoring script
-    cd
+    mkdir /out
+    cd /out
     monitor_script.sh > monitoring.log &
 
     # display for log
-    echo "Localizing the data from ~{cellprofiler_output_directory_gsurl}"
+    echo "Localizing data from ~{cellprofiler_output_directory_gsurl}"
     start=`date +%s`
     echo $start
 
@@ -122,9 +123,9 @@ task create_sqlite_and_aggregated_csv {
   }
 
   output {
-    File aggregated_csv = "~{output_filename}"
-    File sqlite = "backend.sqlite"
-    File monitoring_log = "monitoring.log"
+    File aggregated_csv = "/out/~{output_filename}"
+    File sqlite = "/out/backend.sqlite"
+    File monitoring_log = "/out/monitoring.log"
     File log = stdout()
   }
 
