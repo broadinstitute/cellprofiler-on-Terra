@@ -123,9 +123,9 @@ task create_sqlite_and_aggregated_csv {
   }
 
   output {
-    File aggregated_csv = "~{output_filename}"
-    File sqlite = "backend.sqlite"
-    File monitoring_log = "monitoring.log"
+    File aggregated_csv = "out/~{output_filename}"
+    File sqlite = "out/backend.sqlite"
+    File monitoring_log = "out/monitoring.log"
     File log = stdout()
   }
 
