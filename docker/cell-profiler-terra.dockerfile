@@ -1,4 +1,4 @@
-FROM cellprofiler/cellprofiler:4.0.6
+FROM cellprofiler/cellprofiler:4.1.3
 
 # Install S3FS
 
