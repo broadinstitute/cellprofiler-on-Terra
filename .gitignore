@@ -40,3 +40,7 @@ rsconnect/
 
 # Compiled python
 .pyc
+
+# Jupyter notebook files
+.ipynb
+.ipynb_checkpoints/
