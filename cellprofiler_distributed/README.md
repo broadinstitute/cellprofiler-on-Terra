@@ -23,6 +23,8 @@ parameters.)
     and a config YAML file.  [See here](https://raw.githubusercontent.com/broadinstitute/pe2loaddata/master/config.yml)
     for an example YAML file, where channel information is specified.
     
+    - Makes use of scripts from [here](https://github.com/broadinstitute/pe2loaddata)
+    
 2. `cpd_max_projection_pipeline`
 
     - See the [workflow here](https://portal.firecloud.org/#methods/bayer-pcl-cell-imaging/cpd_max_projection_pipeline/23)
