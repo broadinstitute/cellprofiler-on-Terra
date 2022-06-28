@@ -1,0 +1,17 @@
+version: 1.2
+workflows:
+  - subclass: WDL
+    primaryDescriptorPath: /cellprofiler_distributed/cellprofiler_distributed_utils.wdl
+    name: /cellprofiler_distributed/cellprofiler_distributed_utils
+  - subclass: WDL
+    primaryDescriptorPath: /cellprofiler_distributed/create_load_data.wdl
+    name: create_load_data
+  - subclass: WDL
+    primaryDescriptorPath: /cellprofiler_distributed/cpd_max_projection_pipeline.wdl
+    name: cpd_max_projection_pipeline
+  - subclass: WDL
+    primaryDescriptorPath: /cellprofiler_distributed/cp_illumination_pipeline.wdl
+    name: cp_illumination_pipeline
+  - subclass: WDL
+    primaryDescriptorPath: /cellprofiler_distributed/cpd_analysis_pipeline.wdl
+    name: cpd_analysis_pipeline
