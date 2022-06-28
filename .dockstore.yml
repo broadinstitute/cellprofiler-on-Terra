@@ -15,3 +15,6 @@ workflows:
   - subclass: WDL
     primaryDescriptorPath: /cellprofiler_distributed/cpd_analysis_pipeline.wdl
     name: cpd_analysis_pipeline
+  - subclass: WDL
+    primaryDescriptorPath: /mining/cytomining.wdl
+    name: cytomining
