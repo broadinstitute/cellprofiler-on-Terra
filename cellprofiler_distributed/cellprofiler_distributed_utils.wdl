@@ -433,6 +433,7 @@ task cellprofiler_pipeline_task {
     set -o errexit
     set -o pipefail
     set -o nounset
+    # send a trace of all fully resolved executed commands to stderr
     set -o xtrace
     
     export TMPDIR=/tmp
