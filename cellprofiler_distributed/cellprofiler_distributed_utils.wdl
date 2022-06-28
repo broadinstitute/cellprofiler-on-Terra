@@ -423,14 +423,18 @@ task cellprofiler_pipeline_task {
 
   }
 
-  command {
+  command <<<
 
     # NOTE: cellprofiler pipelines might implicitly depend on the existence of
     #       specific files that are not passed as inputs at the command line:
     #       the "load_data.csv" file is one such file.
 
     # errors should cause the task to fail, not produce an empty output
-    set -e
+    set -o errexit
+    set -o pipefail
+    set -o nounset
+    set -o xtrace
+    
     export TMPDIR=/tmp
     mv ~{monitoring_script} monitoring_script.sh
     chmod a+rx monitoring_script.sh
@@ -470,6 +474,7 @@ task cellprofiler_pipeline_task {
     echo "Running cellprofiler ==================="
     # run cellprofiler pipeline
     cellprofiler --run --run-headless \
+      --data-file=~{load_data_csv} \
       -p ~{cppipe_file}  \
       -o output \
       -i $csv_dir
@@ -483,7 +488,7 @@ task cellprofiler_pipeline_task {
     echo "Directory containing output tarball ============================"
     ls -lah
 
-  }
+  >>>
 
   output {
     File log = stdout()
