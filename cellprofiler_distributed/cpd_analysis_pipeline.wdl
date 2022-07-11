@@ -1,6 +1,6 @@
 version 1.0
 
-import "https://api.firecloud.org/ga4gh/v1/tools/bayer-pcl-cell-imaging:cellprofiler_distributed_utils.wdl/versions/11/plain-WDL/descriptor" as util
+import "https://raw.githubusercontent.com/broadinstitute/cellprofiler-on-Terra/master/cellprofiler_distributed/cellprofiler_distributed_utils.wdl" as util
 
 ## Copyright Broad Institute, 2021
 ##
