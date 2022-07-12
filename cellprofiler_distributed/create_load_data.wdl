@@ -16,6 +16,9 @@ workflow create_load_data {
     String images_directory_gsurl
     String? file_extension = ".tiff"
 
+    # Ensure path does not end in a trailing slash
+    String images_directory_gsurl = sub(images_directory_gsurl, "/+$", "")
+
   }
 
   # Define the input files, so that we use Cromwell's automatic file localization
