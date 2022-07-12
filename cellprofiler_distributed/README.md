@@ -46,7 +46,7 @@ parameters.)
     
 5. `cytomining`
 
-    - See the [workflow here](https://portal.firecloud.org/#methods/bayer-pcl-cell-imaging/cytomining/11)
+    - See the [workflow here](https://portal.firecloud.org/#methods/bayer-pcl-cell-imaging/cytomining/13)
 
     - One directory up in this repo, the "mining" folder contains a workflow to 
     run steps to create a SQLite datbase and aggregate the data into a CSV file 
