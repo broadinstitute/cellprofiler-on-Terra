@@ -7,31 +7,40 @@ version 1.0
 ## (see LICENSE in https://github.com/openwdl/wdl).
 
 
-task create_sqlite_and_aggregated_csv {
+task profiling {
   # A file that pipelines typically implicitly assume they have access to.
-  # Generated from a microscope XML file and a config.yaml file.
 
   input {
     # Input files
-    String cellprofiler_output_directory_gsurl
-    String config_ini_file_gsurl
-
-    # Desired location of the outputs (optional)
-    String? output_directory_gsurl = ""
+    String cellprofiler_analysis_directory_gsurl
+    String plate_id
 
     # Pycytominer aggregation step
     String? aggregation_operation = "median"
 
+    # Pycytominer annotation step
+    File plate_map_file
+    String? annotate_join_on = "['Metadata_well_position', 'Metadata_Well']"
+
+    # Pycytominer normalize step
+    String? normalize_method = "mad_robustize"
+
+    # Desired location of the outputs
+    String output_directory_gsurl
+
+    # Output filenames:
+    String agg_filename = plate_id + "_aggregated_" + aggregation_operation + ".csv"
+    String aug_filename = plate_id + "_annotated_" + aggregation_operation + ".csv"
+    String norm_filename = plate_id + "_normalized_" + aggregation_operation + ".csv"
+
     # Docker image
-    String? docker_image = "us.gcr.io/broad-dsde-methods/cytomining:0.0.1"
+    String? docker_image = "us.gcr.io/broad-dsde-methods/cytomining:0.0.2"
 
     # Hardware-related inputs
     Int? hardware_disk_size_GB = 500
-    Int? hardware_memory_GB = 15
+    Int? hardware_memory_GB = 30
     Int? hardware_cpu_count = 4
     Int? hardware_boot_disk_size_GB = 10
-
-    String output_filename = "aggregated_" + aggregation_operation + ".csv"
   }
 
   command {
@@ -39,19 +48,18 @@ task create_sqlite_and_aggregated_csv {
     set -e
 
     # run monitoring script
-    mkdir out
-    cd out
     monitor_script.sh > monitoring.log &
 
     # display for log
-    echo "Localizing data from ~{cellprofiler_output_directory_gsurl}"
+    echo "Localizing data from ~{cellprofiler_analysis_directory_gsurl}"
     start=`date +%s`
     echo $start
 
     # localize the data
     mkdir -p /cromwell_root/data
-    gsutil -mq rsync -r -x ".*\.png$" ~{cellprofiler_output_directory_gsurl} /cromwell_root/data
-    gsutil -q cp ~{config_ini_file_gsurl} ingest_config.ini
+    gsutil -mq rsync -r -x ".*\.png$" ~{cellprofiler_analysis_directory_gsurl} /cromwell_root/data
+    wget -O ingest_config.ini https://raw.githubusercontent.com/broadinstitute/cytominer_scripts/master/ingest_config.ini
+    wget -O indices.sql https://raw.githubusercontent.com/broadinstitute/cytominer_scripts/master/indices.sql
 
     # display for log
     end=`date +%s`
@@ -77,10 +85,15 @@ task create_sqlite_and_aggregated_csv {
     echo "===================================="
     start=`date +%s`
     echo $start
-    echo "cytominer-database ingest /cromwell_root/data sqlite:///backend.sqlite -c ingest_config.ini"
+    echo "cytominer-database ingest /cromwell_root/data sqlite:///~{plate_id}.sqlite -c ingest_config.ini"
 
     # run the very long SQLite database ingestion code
-    cytominer-database ingest /cromwell_root/data sqlite:///backend.sqlite -c ingest_config.ini
+    cytominer-database ingest /cromwell_root/data sqlite:///~{plate_id}.sqlite -c ingest_config.ini
+    sqlite3 ~{plate_id}.sqlite < indices.sql
+
+    # Copying sqlite
+    echo "Copying sqlite file to ~{output_directory_gsurl}"
+    gsutil cp ~{plate_id}.sqlite ~{output_directory_gsurl}/
 
     # display for log
     end=`date +%s`
@@ -95,37 +108,55 @@ task create_sqlite_and_aggregated_csv {
     echo "Running pycytominer aggregation step"
     python <<CODE
 
+    import time
+    import pandas as pd
     from pycytominer.cyto_utils.cells import SingleCells
-    sc = SingleCells('sqlite:///backend.sqlite',
-                     aggregation_operation='~{aggregation_operation}')
-    sc.aggregate_profiles().to_csv('~{output_filename}')
+    from pycytominer.cyto_utils import infer_cp_features
+    from pycytominer import normalize, annotate
+
+    print("Creating Single Cell class... ")
+    start = time.time()
+    sc = SingleCells('sqlite:///~{plate_id}.sqlite',aggregation_operation='~{aggregation_operation}')
+    print("Time: " + str(time.time() - start))
+
+    print("Aggregating profiles... ")
+    start = time.time()
+    aggregated_df = sc.aggregate_profiles()
+    aggregated_df.to_csv('~{agg_filename}', index=False)
+    print("Time: " + str(time.time() - start))
+
+    print("Annotating with metadata... ")
+    start = time.time()
+    plate_map_df = pd.read_csv('~{plate_map_file}', sep="\t")
+    annotated_df = annotate(aggregated_df, plate_map_df, join_on = ~{annotate_join_on})
+    annotated_df.to_csv('~{aug_filename}',index=False)
+    print("Time: " + str(time.time() - start))
+
+    print("Normalizing to plate.. ")
+    start = time.time()
+    normalize(annotated_df, method='~{normalize_method}').to_csv('~{norm_filename}',index=False)
+    print("Time: " + str(time.time() - start))
 
     CODE
 
     # display for log
     echo " "
-    echo "Completed pycytominer aggregation"
+    echo "Completed pycytominer aggregation annotation & normalization"
     echo "ls -lh ."
     ls -lh .
 
-    if [ -z "~{output_directory_gsurl}" ]
-    then
-        echo "No output google bucket specified"
-    else
-        echo "Copying outputs to ~{output_directory_gsurl}"
-        gsutil cp backend.sqlite ~{output_directory_gsurl}
-        gsutil cp ~{output_filename} ~{output_directory_gsurl}
-        gsutil cp monitoring.log ~{output_directory_gsurl}
-    fi
+    echo "Copying csv outputs to ~{output_directory_gsurl}"
+    gsutil cp ~{agg_filename} ~{output_directory_gsurl}/
+    gsutil cp ~{aug_filename} ~{output_directory_gsurl}/
+    gsutil cp ~{norm_filename} ~{output_directory_gsurl}/
+    gsutil cp monitoring.log ~{output_directory_gsurl}/
 
     echo "Done."
 
   }
 
   output {
-    File aggregated_csv = "out/~{output_filename}"
-    File sqlite = "out/backend.sqlite"
-    File monitoring_log = "out/monitoring.log"
+    File monitoring_log = "monitoring.log"
     File log = stdout()
   }
 
@@ -136,6 +167,7 @@ task create_sqlite_and_aggregated_csv {
     bootDiskSizeGb: hardware_boot_disk_size_GB
     cpu: hardware_cpu_count
     maxRetries: 2
+    preemptible: 2
   }
 
 }
@@ -143,13 +175,11 @@ task create_sqlite_and_aggregated_csv {
 
 workflow cytomining {
 
-  call create_sqlite_and_aggregated_csv {}
+  call profiling {}
 
   output {
-    File monitoring_log = create_sqlite_and_aggregated_csv.monitoring_log
-    File log = create_sqlite_and_aggregated_csv.log
-    File sqlite = create_sqlite_and_aggregated_csv.sqlite
-    File aggregated_csv = create_sqlite_and_aggregated_csv.aggregated_csv
+    File monitoring_log = profiling.monitoring_log
+    File log = profiling.log
   }
 
 }

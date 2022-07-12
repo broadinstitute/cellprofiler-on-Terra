@@ -4,7 +4,7 @@ extracted CellProfiler features.  Also run a
 [`pycytominer`](https://github.com/cytomining/pycytominer) 
 aggregation step to create a distilled, smaller CSV file.
 
-See the [workflow here](https://portal.firecloud.org/#methods/bayer-pcl-cell-imaging/cytomining/11)
+See the [workflow here](https://portal.firecloud.org/#methods/bayer-pcl-cell-imaging/cytomining/13)
 
 See a description of how this workflow fits into a CellPainting analysis pipeline 
 in the README in the "cellprofiler_distributed" folder.
