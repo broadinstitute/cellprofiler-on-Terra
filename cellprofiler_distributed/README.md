@@ -27,7 +27,7 @@ parameters.)
     
 2. `cpd_max_projection_pipeline`
 
-    - See the [workflow here](https://portal.firecloud.org/#methods/bayer-pcl-cell-imaging/cpd_max_projection_pipeline/23)
+    - See the [workflow here](https://portal.firecloud.org/#methods/bayer-pcl-cell-imaging/cpd_max_projection_pipeline/24)
 
     - Run a max projection step in CellProfiler.
     
