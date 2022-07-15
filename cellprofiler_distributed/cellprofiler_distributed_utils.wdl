@@ -129,10 +129,9 @@ task generate_load_data_csv {
     File config_yaml
     File stdout
     String? illum_dir = "/cromwell_root/illum"
-    File? python_script = "gs://fc-secure-190cf4d5-2ec2-402d-aee1-eb7b6494aaab/scripts/commands.py"
 
     # Docker image
-    String docker_image = "python:3.9.1-buster"
+    String docker_image = "us.gcr.io/broad-dsde-methods/python_cellprofiler_on_terra:0.0.1"
 
     # Hardware-related inputs
     Int hardware_disk_size_GB = 50
@@ -145,8 +144,6 @@ task generate_load_data_csv {
 
   command {
 
-    pip install pyyaml ipython click pandas
-
     # get the XML directory
     xml_dir=$(dirname ~{xml_file})
 
@@ -154,8 +151,8 @@ task generate_load_data_csv {
     ls -lah $xml_dir
 
     # run the script
-    python ~{python_script} pe2-load-data  --index-directory $xml_dir --index-file ~{xml_file} --image-file-path-collection-file ~{stdout} --config-yaml ~{config_yaml} --output-file ~{output_filename}
-    python ~{python_script} append-illum-cols --illum-directory ~{illum_dir} --config-yaml ~{config_yaml} --input-csv ~{output_filename} --output-csv ~{output_illum_filename}
+    python /scripts/commands.py pe2-load-data  --index-directory $xml_dir --index-file ~{xml_file} --image-file-path-collection-file ~{stdout} --config-yaml ~{config_yaml} --output-file ~{output_filename}
+    python /scripts/commands.py append-illum-cols --illum-directory ~{illum_dir} --config-yaml ~{config_yaml} --input-csv ~{output_filename} --output-csv ~{output_illum_filename}
 
     # view the output
     echo "Output CSV file ================================"
@@ -188,10 +185,9 @@ task scatter_index {
     # Input files
     File load_data_csv
     String splitby_metadata
-    File? python_script = "gs://fc-secure-190cf4d5-2ec2-402d-aee1-eb7b6494aaab/scripts/cpd_utils.py"
 
     # Docker image
-    String docker_image = "python:3.9.1-buster"
+    String docker_image = "us.gcr.io/broad-dsde-methods/python_cellprofiler_on_terra:0.0.1"
 
     # Hardware-related inputs
     Int hardware_disk_size_GB = 50
@@ -203,9 +199,8 @@ task scatter_index {
 
   command {
 
-    pip install pandas ipython numpy click
     # run the script
-    python ~{python_script} scatter-index \
+    python /scripts/cpd_utils.py scatter-index \
         --csv-file ~{load_data_csv} \
         --splitby-metadata ~{splitby_metadata} \
         --output-file ~{output_filename}
@@ -240,10 +235,9 @@ task splitto_scatter {
     File load_data_csv
     String splitby_metadata
     String index
-    File? python_script = "gs://fc-secure-190cf4d5-2ec2-402d-aee1-eb7b6494aaab/scripts/cpd_utils.py"
 
     # Docker image
-    String docker_image = "python:3.9.1-buster"
+    String docker_image = "us.gcr.io/broad-dsde-methods/python_cellprofiler_on_terra:0.0.1"
 
     # Hardware-related inputs
     Int hardware_disk_size_GB = 50
@@ -257,7 +251,7 @@ task splitto_scatter {
   command {
     pip install pandas ipython numpy click
 
-    python ~{python_script} splitto-scatter \
+    python /scripts/cpd_utils.py splitto-scatter \
       --image-directory ~{image_directory} \
       --illum-directory ~{illum_directory} \
       --csv-file ~{load_data_csv} \
@@ -295,7 +289,7 @@ task filter_csv {
     File? full_load_data_with_illum_csv
 
     # Docker image
-    String docker_image = "us.gcr.io/broad-dsde-methods/scanpy:1.5.1"
+    String docker_image = "us.gcr.io/broad-dsde-methods/python_cellprofiler_on_terra:0.0.1"
 
     # Hardware-related inputs
     Int hardware_disk_size_GB = 50
@@ -405,7 +399,7 @@ task cellprofiler_pipeline_task {
     File cppipe_file
 
     # Docker image
-    String? cellprofiler_docker_image = "cellprofiler/cellprofiler:4.1.3"
+    String? cellprofiler_docker_image = "cellprofiler/cellprofiler:4.2.1"
 
     # Hardware-related inputs
     Int hardware_boot_disk_size_GB
@@ -415,7 +409,6 @@ task cellprofiler_pipeline_task {
     Int hardware_preemptible_tries
 
     String tarball_name = "outputs.tar.gz"
-    File monitoring_script = "gs://fc-secure-190cf4d5-2ec2-402d-aee1-eb7b6494aaab/scripts/monitor_script.sh"
 
     # NOTE: load_data.csv must specify that all the images are in /cromwell_root/data and /cromwell_root/illum
     String input_image_dir = "/cromwell_root/data"
@@ -437,7 +430,7 @@ task cellprofiler_pipeline_task {
     set -o xtrace
     
     export TMPDIR=/tmp
-    mv ~{monitoring_script} monitoring_script.sh
+    wget -O monitor_script.sh https://raw.githubusercontent.com/klarman-cell-observatory/cumulus/master/docker/monitor_script.sh
     chmod a+rx monitoring_script.sh
     ./monitoring_script.sh > monitoring.log &
 
@@ -458,15 +451,12 @@ task cellprofiler_pipeline_task {
     pwd
 
     # move the images to a precisely-known path
-    # Previously:
-    # Now done by channel because it fails if too many images >100000
     mkdir ~{input_image_dir}
     ulimit -S -s unlimited
     mv $cromwell_image_dir/*.tiff ~{input_image_dir}
 
     # move the illum images to a precisely-known path
     mkdir ~{illum_image_dir}
-    # mv $cromwell_image_dir/illum/*.npy ~{illum_image_dir}
     [ -n "$(shopt -s nullglob; echo $cromwell_image_dir/illum/*.npy)" ] && mv $cromwell_image_dir/illum/*.npy ~{illum_image_dir}
 
     # make a directory to contain the outputs
