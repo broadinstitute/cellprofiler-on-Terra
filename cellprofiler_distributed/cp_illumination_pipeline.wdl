@@ -19,6 +19,9 @@ workflow cp_illumination_pipeline {
     # And the desired location of the outputs (optional)
     String output_illum_directory_gsurl = "${images_directory_gsurl}/illum"
 
+    # Ensure paths do not end in a trailing slash
+    String images_directory_gsurl = sub(images_directory_gsurl, "/+$", "")
+
   }
 
   # Define the input files, so that we use Cromwell's automatic file localization
