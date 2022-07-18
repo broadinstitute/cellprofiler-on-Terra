@@ -51,7 +51,6 @@ workflow cpd_max_projection_distributed {
       input:
         all_images_files = sp.array_output,
         load_data_csv = sp.output_tiny_csv,
-        cellprofiler_docker_image = "cellprofiler/cellprofiler:4.1.3",
         hardware_boot_disk_size_GB = 20,
         hardware_preemptible_tries = 2,
     }

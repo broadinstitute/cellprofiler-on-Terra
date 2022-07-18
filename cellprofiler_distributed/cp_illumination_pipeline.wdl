@@ -36,7 +36,6 @@ workflow cp_illumination_pipeline {
     input:
       all_images_files=directory.file_array,  # from util.gsutil_ls task
       load_data_csv= images_directory_gsurl + "/load_data.csv",
-      cellprofiler_docker_image = "cellprofiler/cellprofiler:4.1.3",
       hardware_boot_disk_size_GB = 20,
       hardware_preemptible_tries = 2,
   }
