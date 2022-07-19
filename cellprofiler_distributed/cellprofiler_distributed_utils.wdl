@@ -431,8 +431,8 @@ task cellprofiler_pipeline_task {
     
     export TMPDIR=/tmp
     wget -O monitor_script.sh https://raw.githubusercontent.com/klarman-cell-observatory/cumulus/master/docker/monitor_script.sh
-    chmod a+rx monitoring_script.sh
-    ./monitoring_script.sh > monitoring.log &
+    chmod a+rx monitor_script.sh
+    ./monitor_script.sh > monitoring.log &
 
     # locate the load_csv file directory locally
     csv_dir=$(dirname ~{load_data_csv})
