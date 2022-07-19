@@ -17,21 +17,21 @@ workflow create_load_data {
     String? file_extension = ".tiff"
 
     # Ensure path does not end in a trailing slash
-    String images_directory_gsurl = sub(images_directory_gsurl, "/+$", "")
+    String images_directory = sub(images_directory_gsurl, "/+$", "")
 
   }
 
   # Define the input files, so that we use Cromwell's automatic file localization
   call util.gsutil_ls_to_file as directory {
     input:
-      directory_gsurl=images_directory_gsurl,
+      directory_gsurl=images_directory,
       file_extension=file_extension,
   }
 
   # Create the load_data.csv file
   call util.generate_load_data_csv as script {
     input:
-      xml_file = images_directory_gsurl + "/Index.idx.xml",
+      xml_file = images_directory + "/Index.idx.xml",
       stdout = directory.out
   }
 
@@ -39,14 +39,14 @@ workflow create_load_data {
   call util.gsutil_delocalize {
     input:
       file=script.load_data_csv,
-      destination_gsurl=images_directory_gsurl,
+      destination_gsurl=images_directory,
   }
 
   # Save load_data_will_illum.csv file
   call util.gsutil_delocalize as save_illum{
     input:
       file=script.load_data_with_illum_csv,
-      destination_gsurl=images_directory_gsurl,
+      destination_gsurl=images_directory,
   }
 
   output {

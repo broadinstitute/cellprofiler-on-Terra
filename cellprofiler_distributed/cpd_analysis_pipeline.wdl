@@ -23,15 +23,15 @@ workflow cpd_analysis_pipeline {
     String output_directory_gsurl
 
     # Ensure paths do not end in a trailing slash
-    String images_directory_gsurl = sub(images_directory_gsurl, "/+$", "")
-    String output_directory_gsurl = sub(output_directory_gsurl, "/+$", "")
+    String images_directory = sub(images_directory_gsurl, "/+$", "")
+    String output_directory = sub(output_directory_gsurl, "/+$", "")
 
   }
 
   # Create an index to scatter
   call util.scatter_index as idx {
     input:
-      load_data_csv= images_directory_gsurl + "/load_data_with_illum.csv",
+      load_data_csv= images_directory + "/load_data_with_illum.csv",
       splitby_metadata = splitby_metadata,
   }
 
@@ -39,9 +39,9 @@ workflow cpd_analysis_pipeline {
   scatter(index in idx.value) {
     call util.splitto_scatter as sp {
       input:
-        image_directory =  images_directory_gsurl,
-        illum_directory = images_directory_gsurl + "/illum",
-        load_data_csv = images_directory_gsurl + "/load_data_with_illum.csv",
+        image_directory =  images_directory,
+        illum_directory = images_directory + "/illum",
+        load_data_csv = images_directory + "/load_data_with_illum.csv",
         splitby_metadata = splitby_metadata,
         tiny_csv = "load_data_with_illum.csv",
         index = index,
@@ -58,7 +58,7 @@ workflow cpd_analysis_pipeline {
     call util.extract_and_gsutil_rsync {
       input:
         tarball=cellprofiler.tarball,
-        destination_gsurl=output_directory_gsurl + "/" + index,
+        destination_gsurl=output_directory + "/" + index,
     }
   }
 
