@@ -17,17 +17,17 @@ workflow cp_illumination_pipeline {
     String? file_extension = ".tiff"
 
     # And the desired location of the outputs (optional)
-    String output_illum_directory_gsurl = "${images_directory_gsurl}/illum"
+    String output_illum_directory_gsurl = "${images_directory}/illum"
 
     # Ensure paths do not end in a trailing slash
-    String images_directory_gsurl = sub(images_directory_gsurl, "/+$", "")
+    String images_directory = sub(images_directory_gsurl, "/+$", "")
 
   }
 
   # Define the input files, so that we use Cromwell's automatic file localization
   call util.gsutil_ls as directory {
     input:
-      directory_gsurl=images_directory_gsurl,
+      directory_gsurl=images_directory,
       file_extension=file_extension,
   }
 
@@ -35,7 +35,7 @@ workflow cp_illumination_pipeline {
   call util.cellprofiler_pipeline_task as cellprofiler {
     input:
       all_images_files=directory.file_array,  # from util.gsutil_ls task
-      load_data_csv= images_directory_gsurl + "/load_data.csv",
+      load_data_csv= images_directory + "/load_data.csv",
       hardware_boot_disk_size_GB = 20,
       hardware_preemptible_tries = 2,
   }
@@ -47,12 +47,5 @@ workflow cp_illumination_pipeline {
       tarball=cellprofiler.tarball,
       destination_gsurl=output_illum_directory_gsurl,
   }
-
-
-#  output {
-#    File tarball = cellprofiler.tarball
-#    File log = cellprofiler.log
-#    String output_directory = output_illum_directory_gsurl
-#  }
 
 }

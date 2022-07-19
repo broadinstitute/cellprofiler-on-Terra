@@ -23,15 +23,15 @@ workflow cpd_max_projection_distributed {
     String output_directory_gsurl
 
     # Ensure paths do not end in a trailing slash
-    String images_directory_gsurl = sub(images_directory_gsurl, "/+$", "")
-    String output_directory_gsurl = sub(output_directory_gsurl, "/+$", "")
+    String images_directory = sub(images_directory_gsurl, "/+$", "")
+    String output_directory = sub(output_directory_gsurl, "/+$", "")
 
   }
 
   # Create an index to scatter
   call util.scatter_index as idx {
     input:
-      load_data_csv= images_directory_gsurl + "/load_data.csv",
+      load_data_csv= images_directory + "/load_data.csv",
       splitby_metadata = splitby_metadata,
   }
 
@@ -39,9 +39,9 @@ workflow cpd_max_projection_distributed {
   scatter(index in idx.value) {
     call util.splitto_scatter as sp {
       input:
-        image_directory =  images_directory_gsurl,
+        image_directory =  images_directory,
         illum_directory = "/illum",  # default
-        load_data_csv = images_directory_gsurl + "/load_data.csv",
+        load_data_csv = images_directory + "/load_data.csv",
         splitby_metadata = splitby_metadata,
         tiny_csv = "load_data.csv",
         index = index,
@@ -58,7 +58,7 @@ workflow cpd_max_projection_distributed {
     call util.extract_and_gsutil_rsync {
       input:
         tarball=cellprofiler.tarball,
-        destination_gsurl=output_directory_gsurl,
+        destination_gsurl=output_directory,
     }
   }
 
@@ -66,22 +66,22 @@ workflow cpd_max_projection_distributed {
   # and they are saved in the same folder
   call util.filter_csv as script {
     input:
-      full_load_data_csv= images_directory_gsurl + "/load_data.csv",
-      full_load_data_with_illum_csv= images_directory_gsurl + "/load_data_with_illum.csv",
+      full_load_data_csv= images_directory + "/load_data.csv",
+      full_load_data_with_illum_csv= images_directory + "/load_data_with_illum.csv",
   }
 
   # Save load_data.csv file
   call util.gsutil_delocalize as save_load_data {
     input:
       file=script.load_data_csv,
-      destination_gsurl=output_directory_gsurl,
+      destination_gsurl=output_directory,
   }
 
   # Save load_data_will_illum.csv file
   call util.gsutil_delocalize as save_illum {
     input:
       file=script.load_data_with_illum_csv,
-      destination_gsurl=output_directory_gsurl,
+      destination_gsurl=output_directory,
   }
 
 }

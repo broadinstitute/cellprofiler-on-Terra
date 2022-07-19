@@ -15,6 +15,9 @@ task profiling {
     String cellprofiler_analysis_directory_gsurl
     String plate_id
 
+    # Ensure path does not end in a trailing slash
+    String cellprofiler_analysis_directory = = sub(cellprofiler_analysis_directory_gsurl, "/+$", "")
+
     # Pycytominer aggregation step
     String? aggregation_operation = "median"
 
@@ -27,6 +30,7 @@ task profiling {
 
     # Desired location of the outputs
     String output_directory_gsurl
+    String output_directory = = sub(output_directory_gsurl, "/+$", "")
 
     # Output filenames:
     String agg_filename = plate_id + "_aggregated_" + aggregation_operation + ".csv"
@@ -51,13 +55,13 @@ task profiling {
     monitor_script.sh > monitoring.log &
 
     # display for log
-    echo "Localizing data from ~{cellprofiler_analysis_directory_gsurl}"
+    echo "Localizing data from ~{cellprofiler_analysis_directory}"
     start=`date +%s`
     echo $start
 
     # localize the data
     mkdir -p /cromwell_root/data
-    gsutil -mq rsync -r -x ".*\.png$" ~{cellprofiler_analysis_directory_gsurl} /cromwell_root/data
+    gsutil -mq rsync -r -x ".*\.png$" ~{cellprofiler_analysis_directory} /cromwell_root/data
     wget -O ingest_config.ini https://raw.githubusercontent.com/broadinstitute/cytominer_scripts/master/ingest_config.ini
     wget -O indices.sql https://raw.githubusercontent.com/broadinstitute/cytominer_scripts/master/indices.sql
 
@@ -92,8 +96,8 @@ task profiling {
     sqlite3 ~{plate_id}.sqlite < indices.sql
 
     # Copying sqlite
-    echo "Copying sqlite file to ~{output_directory_gsurl}"
-    gsutil cp ~{plate_id}.sqlite ~{output_directory_gsurl}/
+    echo "Copying sqlite file to ~{output_directory}"
+    gsutil cp ~{plate_id}.sqlite ~{output_directory}/
 
     # display for log
     end=`date +%s`
@@ -145,11 +149,11 @@ task profiling {
     echo "ls -lh ."
     ls -lh .
 
-    echo "Copying csv outputs to ~{output_directory_gsurl}"
-    gsutil cp ~{agg_filename} ~{output_directory_gsurl}/
-    gsutil cp ~{aug_filename} ~{output_directory_gsurl}/
-    gsutil cp ~{norm_filename} ~{output_directory_gsurl}/
-    gsutil cp monitoring.log ~{output_directory_gsurl}/
+    echo "Copying csv outputs to ~{output_directory}"
+    gsutil cp ~{agg_filename} ~{output_directory}/
+    gsutil cp ~{aug_filename} ~{output_directory}/
+    gsutil cp ~{norm_filename} ~{output_directory}/
+    gsutil cp monitoring.log ~{output_directory}/
 
     echo "Done."
 
