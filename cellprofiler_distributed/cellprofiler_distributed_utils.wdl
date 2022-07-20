@@ -105,7 +105,7 @@ task gsutil_delocalize {
 
   command {
     # Copy the file to the specified output location
-    gsutil cp -r ~{file} ~{full_destination_path}
+    gsutil -m cp -r ~{file} ~{full_destination_path}
   }
 
   runtime {
