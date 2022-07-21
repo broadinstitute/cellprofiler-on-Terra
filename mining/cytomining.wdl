@@ -16,7 +16,7 @@ task profiling {
     String plate_id
 
     # Ensure path does not end in a trailing slash
-    String cellprofiler_analysis_directory = = sub(cellprofiler_analysis_directory_gsurl, "/+$", "")
+    String cellprofiler_analysis_directory = sub(cellprofiler_analysis_directory_gsurl, "/+$", "")
 
     # Pycytominer aggregation step
     String? aggregation_operation = "median"
