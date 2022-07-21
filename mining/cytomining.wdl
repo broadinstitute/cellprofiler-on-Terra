@@ -30,7 +30,7 @@ task profiling {
 
     # Desired location of the outputs
     String output_directory_gsurl
-    String output_directory = = sub(output_directory_gsurl, "/+$", "")
+    String output_directory = sub(output_directory_gsurl, "/+$", "")
 
     # Output filenames:
     String agg_filename = plate_id + "_aggregated_" + aggregation_operation + ".csv"
