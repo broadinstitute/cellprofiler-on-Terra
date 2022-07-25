@@ -264,8 +264,8 @@ task splitto_scatter {
 
   output {
     Array[String] array_output = read_lines(filename_text)
-    File filename_text = "${filename_text}"
-    File output_tiny_csv = "${tiny_csv}"
+    File output_filename_text = filename_text
+    File output_tiny_csv = tiny_csv
   }
 
   runtime {
@@ -373,6 +373,10 @@ task extract_and_gsutil_rsync {
     # this will overwrite previous outputs, but not delete other files.
 
     # ====================================================================
+  }
+
+  output {
+      String output_directory = destination_gsurl
   }
 
   runtime {
