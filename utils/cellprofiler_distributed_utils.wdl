@@ -253,13 +253,13 @@ task splitto_scatter {
     pip install pandas ipython numpy click
 
     python /scripts/cpd_utils.py splitto-scatter \
-      --image-directory ~{image_directory} \
-      --illum-directory ~{illum_directory} \
-      --csv-file ~{load_data_csv} \
-      --splitby-metadata ~{splitby_metadata} \
-      --index ~{index} \
-      --output-text ~{filename_text} \
-      --output-csv ~{tiny_csv}
+      ~{"--image-directory " + image_directory} \
+      ~{"--illum-directory " + illum_directory} \
+      ~{"--csv-file " + load_data_csv} \
+      ~{"--splitby-metadata " + splitby_metadata} \
+      ~{"--index " + index} \
+      ~{"--output-text " + filename_text} \
+      ~{"--output-csv " + tiny_csv}
 
   }
 
