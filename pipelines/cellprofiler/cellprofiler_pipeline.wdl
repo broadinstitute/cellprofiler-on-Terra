@@ -25,9 +25,16 @@ workflow cellprofiler_pipeline {
 
   }
 
-  # Ensure paths do not end in a trailing slash
-  String input_directory = sub(input_directory_gsurl, "/+$", "")
-  String output_directory = sub(output_directory_gsurl, "/+$", "")
+    # Specify Metadata used to distribute the analysis: Well (default), Site...
+    # An empty string "" will use a single VM
+    String splitby_metadata = "Metadata_Well"
+
+    # Ensure paths do not end in a trailing slash
+    String input_directory = sub(input_directory_gsurl, "/+$", "")
+    String output_directory = sub(output_directory_gsurl, "/+$", "")
+
+  }
+  Boolean do_scatter = splitby_metadata == ""  # true if splitby_metadata is empty
 
   # Define the input files, so that we use Cromwell's automatic file localization
   call util.gsutil_ls_to_file as directory {
@@ -47,25 +54,70 @@ workflow cellprofiler_pipeline {
     String load_data_csv_file = script.load_data_csv
   }
 
-  # Run CellProfiler pipeline
-  call util.cellprofiler_pipeline_task as cellprofiler {
-    input:
-      all_images_files=read_lines(directory.out),  # from util.gsutil_ls_to_file task
-      load_data_csv=load_data_csv_file,
+  if (!do_scatter) {
+
+    # Run CellProfiler pipeline
+    call util.cellprofiler_pipeline_task as cellprofiler {
+      input:
+        all_images_files=read_lines(directory.out),
+        load_data_csv=load_data_csv_file,
+    }
+
+    # Optionally delocalize outputs
+    if (output_directory_gsurl != "") {
+      call util.extract_and_gsutil_rsync {
+        input:
+          tarball=cellprofiler.tarball,
+          destination_gsurl=output_directory,
+      }
+    }
+
   }
 
-  # Optionally delocalize outputs
-  if (output_directory != "") {
-    call util.extract_and_gsutil_rsync {
+  if (do_scatter) {
+
+    # Create an index to scatter
+    call util.scatter_index as idx {
       input:
-        tarball=cellprofiler.tarball,
-        destination_gsurl=output_directory,
+        load_data_csv=script.load_data_csv,
+        splitby_metadata=splitby_metadata,
     }
+
+    # Run CellProfiler pipeline scattered
+    scatter(index in idx.value) {
+
+      call util.splitto_scatter as sp {
+        input:
+          image_directory=input_directory,
+#          illum_directory=input_directory + "/illum",
+          load_data_csv=script.load_data_csv,
+          splitby_metadata=splitby_metadata,
+          tiny_csv="load_data.csv",
+          index=index,
+      }
+
+      call util.cellprofiler_pipeline_task as cellprofiler {
+        input:
+          all_images_files=sp.array_output,
+          load_data_csv=sp.output_tiny_csv,
+      }
+
+      # Optionally delocalize outputs
+      if (output_directory_gsurl != "") {
+        call util.extract_and_gsutil_rsync {
+          input:
+            tarball=cellprofiler.tarball,
+            destination_gsurl=output_directory + "/" + index,
+        }
+      }
+
+    }
+
   }
 
   output {
-    File tarball = cellprofiler.tarball
-    File log = cellprofiler.log
+    File tarball = if do_scatter then "none" else cellprofiler.tarball
+    File log = if do_scatter then "none" else cellprofiler.log
     String output_path = output_directory
   }
 
