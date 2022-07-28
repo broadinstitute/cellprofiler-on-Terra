@@ -1,37 +1,43 @@
 # CellProfiler on Terra
 
-WDL workflows and scripts for running a CellProfiler pipeline on Google Cloud hardware.
+WDL workflows and scripts for running a CellProfiler pipeline on Google Cloud hardware. 
+Includes workflows for all steps of a full Cell Painting pipeline.
 
 Works well in Terra, and will also work on any Cromwell server that can run WDLs. 
-Currently specific to a Google Cloud backend.
+Currently specific to a Google Cloud backend.  (We are open to supporting more 
+backends, specifically cloud storage locations, in the future, including AWS and Azure.)
 
-## Three pipelines in this repo:
+## Three pipelines:
 
-1. CellProfiler distributed
+1. [Cell Painting](pipelines/cellpainting)
 
-    - Appropriate for datasets of arbitrary size, this is a set of workflows that 
-    together form a full analysis pipeline for CellPainting feature extraction.
-    
+    - All the workflows necessary to run an end-to-end Cell Painting pipeline, 
+    starting with raw images and ending with extracted features, both in database 
+    format and aggregated as CSV files.
+    - Appropriate for datasets of arbitrary size.
     - Scatters the time-consuming analysis steps over many VMs in parallel. 
-    Currently, a dataset is split into indiviual wells, and each well is run 
+    Currently, a dataset is split into individual wells, and each well is run 
     on a separate VM.
-    
-    - More mature version the single VM workflows.
 
-2. Cytominer
+3. [Cytominer](pipelines/mining)
 
-    - Run the `cytominer` database ingest step to create a sqlite database 
-    containing all the CellProfiler output data.
+    - Run the [`cytominer-database`](https://github.com/cytomining/cytominer-database) 
+    ingest step to create a SQLite database containing all the extracted features.
+    - Run the aggregation step from [`pycytominer`](https://github.com/cytomining/pycytominer) 
+    to create CSV files.
     
-    - Run the aggregation step from `pycytominer` to create a CSV file.
-    
-3. (CellProfiler on a single VM)
+4. [CellProfiler](pipelines/cellprofiler) (distributed or single VM)
 
-    - Appropriate for a small dataset, or in cases where fast time-to-completion 
-    is not an issue, this pipeline, composed of a single WDL workflow, will run 
-    a CellProfiler `.cppipe` pipeline on a dataset.
-    
-    - This is our initial proof-of-concept pipeline, and it does not have workflows 
-    specific for illumination correction and max projection.
-    
-    - (May be deprecated in the future.)
+    - A single WDL workflow that runs a CellProfiler `.cppipe` pipeline on a dataset.
+
+## How to run these workflows yourself
+
+These workflows are all publicly available, and 
+[hosted in Dockstore](https://dockstore.org/workflows/github.com/broadinstitute/cellprofiler-on-Terra). 
+From there, you can import and run the workflows in [Terra](https://app.terra.bio) or any other 
+place you like to run [WDL workflows](https://github.com/openwdl/wdl).
+
+The workflows are also hosted in the 
+[Broad Methods Repository](https://portal.firecloud.org/#methods); however, these do not 
+automatically sync with the latest changes in GitHub.  Using workflows from 
+Dockstore will ensure you have the most up-to-date versions.
