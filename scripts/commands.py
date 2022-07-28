@@ -266,7 +266,11 @@ def cli(*args, **kwargs):
     default="/",
     help="Directory with images."
 )
-@click.option("--index-file", type=str, default="Index.idx.xml", help="Index file path.")
+@click.option(
+    "--index-file",
+    type=str,
+    default="Index.idx.xml",
+    help="Index file path.")
 @click.option(
     "--image-file-path-collection-file",
     type=str,
@@ -279,7 +283,11 @@ def cli(*args, **kwargs):
     default="config.yml",
     help="Configuration file path."
 )
-@click.option("--output-file", type=str, default="load_data.csv", help="Output file location.")
+@click.option(
+    "--output-file",
+    type=str,
+    default="load_data.csv",
+    help="Output file location.")
 def pe2_load_data(
     index_directory: str,
     index_file: str,
@@ -309,13 +317,6 @@ def pe2_load_data(
 
 
 @cli.command()
-def filter_csv_hard_coded():
-    csv_path = "/app/output_csv/load_data_with_illum.csv"
-    df = pd.read_csv(csv_path)
-    df[df["Metadata_PlaneID"] == 4].to_csv("/app/output_csv/filtered_illum.csv")
-
-
-@cli.command()
 @click.option(
     "--illum-directory",
     type=str,
@@ -323,19 +324,38 @@ def filter_csv_hard_coded():
     help="Directory with images."
 )
 @click.option(
-    "--illum_filetype", default='.npy',
-    help="The file type of the illum files- in CP2.X, this should be '.mat', in CP3.X '.npy'")
+    "--illum-filetype",
+    default='.npy',
+    help="The file type of the illum files- in CP2.X, this should be '.mat', in CP3.X '.npy'"
+)
+@click.option(
+    "--plate-id",
+    type=str,
+    default="plate_id",
+    help="Plate ID"
+)
 @click.option(
     "--config-yaml",
     type=str,
     default="/root/efs/drugdensityrerun/workspace/software/cellpainting_scripts/config.yml",
     help="Configuration file path."
 )
-@click.option("--input-csv", type=str, default="/load_data.csv", help="Load data file location.")
-@click.option("--output-csv", type=str, default="/load_data_with_illum.csv", help="Output with illum file location.")
+@click.option(
+    "--input-csv",
+    type=str,
+    default="/load_data.csv",
+    help="Load data file location."
+)
+@click.option(
+    "--output-csv",
+    type=str,
+    default="/load_data_with_illum.csv",
+    help="Output with illum file location."
+)
 def append_illum_cols(
     illum_directory: str,
     illum_filetype: str,
+    plate_id: str,
     config_yaml: str,
     input_csv: str,
     output_csv: str,
@@ -346,7 +366,7 @@ def append_illum_cols(
     tmpdir = tempfile.mkdtemp()
     with open(os.path.join(tmpdir, 'illum.csv'), 'w') as fd:
         writer = csv.writer(fd, lineterminator='\n')
-        write_csv(writer, channels, illum_directory, nrows, illum_filetype)
+        write_csv(writer, channels, illum_directory, plate_id, nrows, illum_filetype)
 
     os.system('paste -d "," {} {} > {}'.format(input_csv,
                                                os.path.join(tmpdir, 'illum.csv'),
@@ -355,13 +375,19 @@ def append_illum_cols(
     shutil.rmtree(tmpdir)
 
 
-def write_csv(writer, channels, illum_directory, nrows, illum_filetype):
-    header = sum([["_Illum".join((prefix, channel.replace("Orig", ""))) for prefix in ["FileName", "PathName"]] for channel in sorted(channels.values())], [])
+def write_csv(writer, channels, illum_directory, plate_id, nrows, illum_filetype):
+    header = sum([["_Illum".join((prefix, channel.replace("Orig", ""))) for prefix in ["FileName", "PathName"]] for
+                  channel in sorted(channels.values())], [])
 
     writer.writerow(header)
 
-    row = sum([['Illum' + channel.replace("Orig", "") + illum_filetype, illum_directory] for
-        channel in  sorted(channels.values())], [])
+    if plate_id == "plate_id":
+        row = sum([['Illum' + channel.replace("Orig", "") + illum_filetype, illum_directory] for
+                   channel in  sorted(channels.values())], [])
+    else:
+        row = sum([[plate_id + '_Illum' + channel.replace("Orig", "") + illum_filetype, illum_directory] for
+                   channel in  sorted(channels.values())], [])
+        
     writer.writerows([row] * nrows)
 
 if __name__ == "__main__":
