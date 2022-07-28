@@ -19,7 +19,7 @@ task profiling {
     String cellprofiler_analysis_directory = sub(cellprofiler_analysis_directory_gsurl, "/+$", "")
 
     # Pycytominer aggregation step
-    String? aggregation_operation = "median"
+    String? aggregation_operation = "mean"
 
     # Pycytominer annotation step
     File plate_map_file
@@ -27,6 +27,8 @@ task profiling {
 
     # Pycytominer normalize step
     String? normalize_method = "mad_robustize"
+    Float? mad_robustize_epsilon = 0.0
+
 
     # Desired location of the outputs
     String output_directory_gsurl
@@ -38,13 +40,14 @@ task profiling {
     String norm_filename = plate_id + "_normalized_" + aggregation_operation + ".csv"
 
     # Docker image
-    String? docker_image = "us.gcr.io/broad-dsde-methods/cytomining:0.0.2"
+    String docker_image = "us.gcr.io/broad-dsde-methods/cytomining:0.0.3"
 
     # Hardware-related inputs
     Int? hardware_disk_size_GB = 500
     Int? hardware_memory_GB = 30
     Int? hardware_cpu_count = 4
     Int? hardware_boot_disk_size_GB = 10
+    Int? hardware_preemptible_tries = 2
   }
 
   command {
@@ -138,7 +141,7 @@ task profiling {
 
     print("Normalizing to plate.. ")
     start = time.time()
-    normalize(annotated_df, method='~{normalize_method}').to_csv('~{norm_filename}',index=False)
+    normalize(annotated_df, method='~{normalize_method}', mad_robustize_epsilon = ~{mad_robustize_epsilon}).to_csv('~{norm_filename}',index=False)
     print("Time: " + str(time.time() - start))
 
     CODE
@@ -171,7 +174,7 @@ task profiling {
     bootDiskSizeGb: hardware_boot_disk_size_GB
     cpu: hardware_cpu_count
     maxRetries: 2
-    preemptible: 2
+    preemptible: hardware_preemptible_tries
   }
 
 }
