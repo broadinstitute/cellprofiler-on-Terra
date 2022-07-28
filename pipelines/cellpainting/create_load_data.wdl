@@ -1,6 +1,6 @@
 version 1.0
 
-import "https://raw.githubusercontent.com/carmendv/cellprofiler-on-Terra-Testing/master/utils/cellprofiler_distributed_utils.wdl" as util
+import "https://raw.githubusercontent.com/broadinstitute/cellprofiler-on-Terra/master/utils/cellprofiler_distributed_utils.wdl" as util
 
 ## Copyright Broad Institute, 2021
 ##
