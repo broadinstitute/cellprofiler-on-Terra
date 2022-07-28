@@ -153,7 +153,7 @@ task generate_load_data_csv {
 
     # run the script
     python /scripts/commands.py pe2-load-data  --index-directory $xml_dir --index-file ~{xml_file} --image-file-path-collection-file ~{stdout} --config-yaml ~{config_yaml} --output-file ~{output_filename}
-    python /scripts/commands.py append-illum-cols --illum-directory ~{illum_dir} --platte-id ~{plate_id} --config-yaml ~{config_yaml} --input-csv ~{output_filename} --output-csv ~{output_illum_filename}
+    python /scripts/commands.py append-illum-cols --illum-directory ~{illum_dir} --plate-id ~{plate_id} --config-yaml ~{config_yaml} --input-csv ~{output_filename} --output-csv ~{output_illum_filename}
 
     # view the output
     echo "Output CSV file ================================"
