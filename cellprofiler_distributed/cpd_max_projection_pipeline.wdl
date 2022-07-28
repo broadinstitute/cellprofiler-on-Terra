@@ -51,8 +51,6 @@ workflow cpd_max_projection_distributed {
       input:
         all_images_files = sp.array_output,
         load_data_csv = sp.output_tiny_csv,
-        hardware_boot_disk_size_GB = 20,
-        hardware_preemptible_tries = 2,
     }
 
     call util.extract_and_gsutil_rsync {
