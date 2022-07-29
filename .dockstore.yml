@@ -1,9 +1,6 @@
 version: 1.2
 workflows:
   - subclass: WDL
-    primaryDescriptorPath: /cellpainting/cellprofiler_distributed_utils.wdl
-    name: cellprofiler_distributed_utils
-  - subclass: WDL
     primaryDescriptorPath: /cellpainting/create_load_data.wdl
     name: create_load_data
   - subclass: WDL
