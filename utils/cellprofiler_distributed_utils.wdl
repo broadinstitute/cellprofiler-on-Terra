@@ -128,10 +128,11 @@ task generate_load_data_csv {
     File? xml_file
     File config_yaml
     File stdout
+    String plate_id = "plate_id"
     String? illum_dir = "/cromwell_root/illum"
 
     # Docker image
-    String docker_image = "us.gcr.io/broad-dsde-methods/python_cellprofiler_on_terra:0.0.1"
+    String docker_image = "us.gcr.io/broad-dsde-methods/python_cellprofiler_on_terra:0.0.2"
 
     # Hardware-related inputs
     Int hardware_disk_size_GB = 50
@@ -152,7 +153,7 @@ task generate_load_data_csv {
 
     # run the script
     python /scripts/commands.py pe2-load-data  --index-directory $xml_dir --index-file ~{xml_file} --image-file-path-collection-file ~{stdout} --config-yaml ~{config_yaml} --output-file ~{output_filename}
-    python /scripts/commands.py append-illum-cols --illum-directory ~{illum_dir} --config-yaml ~{config_yaml} --input-csv ~{output_filename} --output-csv ~{output_illum_filename}
+    python /scripts/commands.py append-illum-cols --illum-directory ~{illum_dir} --plate-id ~{plate_id} --config-yaml ~{config_yaml} --input-csv ~{output_filename} --output-csv ~{output_illum_filename}
 
     # view the output
     echo "Output CSV file ================================"
@@ -187,7 +188,7 @@ task scatter_index {
     String splitby_metadata
 
     # Docker image
-    String docker_image = "us.gcr.io/broad-dsde-methods/python_cellprofiler_on_terra:0.0.1"
+    String docker_image = "us.gcr.io/broad-dsde-methods/python_cellprofiler_on_terra:0.0.2"
 
     # Hardware-related inputs
     Int hardware_disk_size_GB = 50
@@ -237,7 +238,7 @@ task splitto_scatter {
     String index
 
     # Docker image
-    String docker_image = "us.gcr.io/broad-dsde-methods/python_cellprofiler_on_terra:0.0.1"
+    String docker_image = "us.gcr.io/broad-dsde-methods/python_cellprofiler_on_terra:0.0.2"
 
     # Hardware-related inputs
     Int hardware_disk_size_GB = 50
@@ -289,7 +290,7 @@ task filter_csv {
     File? full_load_data_with_illum_csv
 
     # Docker image
-    String docker_image = "us.gcr.io/broad-dsde-methods/python_cellprofiler_on_terra:0.0.1"
+    String docker_image = "us.gcr.io/broad-dsde-methods/python_cellprofiler_on_terra:0.0.2"
 
     # Hardware-related inputs
     Int hardware_disk_size_GB = 50
@@ -406,11 +407,11 @@ task cellprofiler_pipeline_task {
     String? cellprofiler_docker_image = "cellprofiler/cellprofiler:4.2.1"
 
     # Hardware-related inputs
-    Int hardware_boot_disk_size_GB
+    Int hardware_boot_disk_size_GB = 20
     Int hardware_disk_size_GB = 500
     Int hardware_memory_GB = 16
     Int hardware_cpu_count = 4
-    Int hardware_preemptible_tries
+    Int hardware_preemptible_tries = 2
 
     String tarball_name = "outputs.tar.gz"
 

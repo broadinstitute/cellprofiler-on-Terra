@@ -1,6 +1,6 @@
 version 1.0
 
-import "https://raw.githubusercontent.com/broadinstitute/cellprofiler-on-Terra/master/cellprofiler_distributed/cellprofiler_distributed_utils.wdl" as util
+import "https://raw.githubusercontent.com/broadinstitute/cellprofiler-on-Terra/master/utils/cellprofiler_distributed_utils.wdl" as util
 
 ## Copyright Broad Institute, 2021
 ##
@@ -51,8 +51,6 @@ workflow cpd_max_projection_distributed {
       input:
         all_images_files = sp.array_output,
         load_data_csv = sp.output_tiny_csv,
-        hardware_boot_disk_size_GB = 20,
-        hardware_preemptible_tries = 2,
     }
 
     call util.extract_and_gsutil_rsync {

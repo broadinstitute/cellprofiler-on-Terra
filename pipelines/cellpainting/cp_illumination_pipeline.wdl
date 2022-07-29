@@ -1,6 +1,6 @@
 version 1.0
 
-import "https://raw.githubusercontent.com/broadinstitute/cellprofiler-on-Terra/master/cellprofiler_distributed/cellprofiler_distributed_utils.wdl" as util
+import "https://raw.githubusercontent.com/broadinstitute/cellprofiler-on-Terra/master/utils/cellprofiler_distributed_utils.wdl" as util
 
 ## Copyright Broad Institute, 2021
 ##
@@ -36,8 +36,6 @@ workflow cp_illumination_pipeline {
     input:
       all_images_files=directory.file_array,  # from util.gsutil_ls task
       load_data_csv= images_directory + "/load_data.csv",
-      hardware_boot_disk_size_GB = 20,
-      hardware_preemptible_tries = 2,
   }
 
   # Delocalize outputs and create new load_data/load_data_with_illum csv files with the new images
