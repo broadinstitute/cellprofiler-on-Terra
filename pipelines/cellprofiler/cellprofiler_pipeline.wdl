@@ -22,11 +22,11 @@ workflow cellprofiler_pipeline {
     # The XML file from the microscope
     String xml_file
 
-    # Ensure paths do not end in a trailing slash
-    String input_directory_gsurl = sub(input_directory_gsurl, "/+$", "")
-    String output_directory_gsurl = sub(output_directory_gsurl, "/+$", "")
-
   }
+
+  # Ensure paths do not end in a trailing slash
+  String input_directory_gsurl = sub(input_directory_gsurl, "/+$", "")
+  String output_directory_gsurl = sub(output_directory_gsurl, "/+$", "")
 
   # Define the input files, so that we use Cromwell's automatic file localization
   call util.gsutil_ls as directory {
