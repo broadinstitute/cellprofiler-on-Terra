@@ -22,11 +22,11 @@ workflow cpd_analysis_pipeline {
     # And the desired location of the outputs
     String output_directory_gsurl
 
-    # Ensure paths do not end in a trailing slash
-    String images_directory = sub(images_directory_gsurl, "/+$", "")
-    String output_directory = sub(output_directory_gsurl, "/+$", "")
-
   }
+
+  # Ensure paths do not end in a trailing slash
+  String images_directory = sub(images_directory_gsurl, "/+$", "")
+  String output_directory = sub(output_directory_gsurl, "/+$", "")
 
   # Create an index to scatter
   call util.scatter_index as idx {

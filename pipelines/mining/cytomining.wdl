@@ -15,9 +15,6 @@ task profiling {
     String cellprofiler_analysis_directory_gsurl
     String plate_id
 
-    # Ensure path does not end in a trailing slash
-    String cellprofiler_analysis_directory = sub(cellprofiler_analysis_directory_gsurl, "/+$", "")
-
     # Pycytominer aggregation step
     String? aggregation_operation = "mean"
 
@@ -29,10 +26,8 @@ task profiling {
     String? normalize_method = "mad_robustize"
     Float? mad_robustize_epsilon = 0.0
 
-
     # Desired location of the outputs
     String output_directory_gsurl
-    String output_directory = sub(output_directory_gsurl, "/+$", "")
 
     # Output filenames:
     String agg_filename = plate_id + "_aggregated_" + aggregation_operation + ".csv"
@@ -49,6 +44,10 @@ task profiling {
     Int? hardware_boot_disk_size_GB = 10
     Int? hardware_preemptible_tries = 2
   }
+
+  # Ensure no trailing slashes
+  String cellprofiler_analysis_directory = sub(cellprofiler_analysis_directory_gsurl, "/+$", "")
+  String output_directory = sub(output_directory_gsurl, "/+$", "")
 
   command {
 
