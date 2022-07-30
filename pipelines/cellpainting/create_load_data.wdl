@@ -12,14 +12,19 @@ workflow create_load_data {
 
   input {
 
-    # Input directory, should have XML file from microscope and tiff images:
+    # Input images directory, should have XML file from microscope and tiff images:
     String images_directory_gsurl
     String? file_extension = ".tiff"
+
+    # Output directory, used to be the same than images directory:
+    String destination_directory_gsurl
 
   }
 
   # Ensure path does not end in a trailing slash
   String images_directory = sub(images_directory_gsurl, "/+$", "")
+  String destination_directory = sub(destination_directory_gsurl, "/+$", "")
+
 
   # Define the input files, so that we use Cromwell's automatic file localization
   call util.gsutil_ls_to_file as directory {
@@ -39,14 +44,14 @@ workflow create_load_data {
   call util.gsutil_delocalize {
     input:
       file=script.load_data_csv,
-      destination_gsurl=images_directory,
+      destination_gsurl=destination_directory,
   }
 
   # Save load_data_will_illum.csv file
   call util.gsutil_delocalize as save_illum{
     input:
       file=script.load_data_with_illum_csv,
-      destination_gsurl=images_directory,
+      destination_gsurl=destination_directory,
   }
 
   output {

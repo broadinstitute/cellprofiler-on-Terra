@@ -15,23 +15,28 @@ workflow cpd_max_projection_distributed {
     # Specify input file information, images directory & extension
     String images_directory_gsurl
     String? file_extension = ".tiff"
+    String load_data_directory_gsurl
 
     # Specify Metadata used to distribute the analysis: Well (default), Site..
     String splitby_metadata = "Metadata_Well"
 
     # And the desired location of the outputs
     String output_directory_gsurl
+    String output_load_data_directory_gsurl = output_directory
 
   }
 
   # Ensure paths do not end in a trailing slash
   String images_directory = sub(images_directory_gsurl, "/+$", "")
+  String load_data_directory = sub(load_data_directory_gsurl, "/+$", "")
   String output_directory = sub(output_directory_gsurl, "/+$", "")
+  String output_load_data_directory = sub(output_load_data_directory_gsurl, "/+$", "")
+
 
   # Create an index to scatter
   call util.scatter_index as idx {
     input:
-      load_data_csv= images_directory + "/load_data.csv",
+      load_data_csv= load_data_directory + "/load_data.csv",
       splitby_metadata = splitby_metadata,
   }
 
@@ -41,7 +46,7 @@ workflow cpd_max_projection_distributed {
       input:
         image_directory =  images_directory,
         illum_directory = "/illum",  # default
-        load_data_csv = images_directory + "/load_data.csv",
+        load_data_csv = load_data_directory + "/load_data.csv",
         splitby_metadata = splitby_metadata,
         tiny_csv = "load_data.csv",
         index = index,
@@ -61,25 +66,24 @@ workflow cpd_max_projection_distributed {
   }
 
   # Create new load_data/load_data_with_illum csv files with the new projected images
-  # and they are saved in the same folder
   call util.filter_csv as script {
     input:
-      full_load_data_csv= images_directory + "/load_data.csv",
-      full_load_data_with_illum_csv= images_directory + "/load_data_with_illum.csv",
+      full_load_data_csv= load_data_directory + "/load_data.csv",,
+      full_load_data_with_illum_csv= load_data_directory + "/load_data_with_illum.csv",
   }
 
   # Save load_data.csv file
   call util.gsutil_delocalize as save_load_data {
     input:
       file=script.load_data_csv,
-      destination_gsurl=output_directory,
+      destination_gsurl=output_load_data_directory,
   }
 
   # Save load_data_will_illum.csv file
   call util.gsutil_delocalize as save_illum {
     input:
       file=script.load_data_with_illum_csv,
-      destination_gsurl=output_directory,
+      destination_gsurl=output_load_data_directory,
   }
 
 }
