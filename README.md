@@ -16,7 +16,7 @@ backends, specifically cloud storage locations, in the future, including AWS and
     format and aggregated as CSV files.
     - Appropriate for datasets of arbitrary size.
     - Scatters the time-consuming analysis steps over many VMs in parallel. 
-    Currently, a dataset is split into individual wells, and each well is run 
+    By default, a dataset is split into individual wells, and each well is run 
     on a separate VM.
 
 3. [Cytominer](pipelines/mining)
@@ -28,7 +28,9 @@ backends, specifically cloud storage locations, in the future, including AWS and
     
 4. [CellProfiler](pipelines/cellprofiler) (distributed or single VM)
 
-    - A single WDL workflow that runs a CellProfiler `.cppipe` pipeline on a dataset.
+    - A single WDL workflow that runs a 
+    [CellProfiler `.cppipe` pipeline](https://cellprofiler-manual.s3.amazonaws.com/CellProfiler-4.2.1/help/pipelines_building.html) 
+    on a dataset.
 
 ## How to run these workflows yourself
 
