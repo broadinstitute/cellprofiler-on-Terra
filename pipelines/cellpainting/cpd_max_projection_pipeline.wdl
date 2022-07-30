@@ -68,7 +68,7 @@ workflow cpd_max_projection_distributed {
   # Create new load_data/load_data_with_illum csv files with the new projected images
   call util.filter_csv as script {
     input:
-      full_load_data_csv= load_data_directory + "/load_data.csv",,
+      full_load_data_csv= load_data_directory + "/load_data.csv",
       full_load_data_with_illum_csv= load_data_directory + "/load_data_with_illum.csv",
   }
 
