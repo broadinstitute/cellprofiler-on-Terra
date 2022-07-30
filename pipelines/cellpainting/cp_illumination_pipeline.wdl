@@ -1,6 +1,6 @@
 version 1.0
 
-import "utils/cellprofiler_distributed_utils.wdl" as util
+import "../utils/cellprofiler_distributed_utils.wdl" as util
 
 ## Copyright Broad Institute, 2021
 ##
