@@ -15,7 +15,8 @@ workflow cpd_max_projection_distributed {
     # Specify input file information, images directory & extension
     String images_directory_gsurl
     String? file_extension = ".tiff"
-    String load_data_directory_gsurl
+    File load_data
+    File load_data_with_illum
 
     # Specify Metadata used to distribute the analysis: Well (default), Site..
     String splitby_metadata = "Metadata_Well"
@@ -28,7 +29,6 @@ workflow cpd_max_projection_distributed {
 
   # Ensure paths do not end in a trailing slash
   String images_directory = sub(images_directory_gsurl, "/+$", "")
-  String load_data_directory = sub(load_data_directory_gsurl, "/+$", "")
   String output_directory = sub(output_directory_gsurl, "/+$", "")
   String output_load_data_directory = sub(output_load_data_directory_gsurl, "/+$", "")
 
@@ -36,7 +36,7 @@ workflow cpd_max_projection_distributed {
   # Create an index to scatter
   call util.scatter_index as idx {
     input:
-      load_data_csv= load_data_directory + "/load_data.csv",
+      load_data_csv= load_data,
       splitby_metadata = splitby_metadata,
   }
 
@@ -46,7 +46,7 @@ workflow cpd_max_projection_distributed {
       input:
         image_directory =  images_directory,
         illum_directory = "/illum",  # default
-        load_data_csv = load_data_directory + "/load_data.csv",
+        load_data_csv = load_data,
         splitby_metadata = splitby_metadata,
         tiny_csv = "load_data.csv",
         index = index,
@@ -68,8 +68,8 @@ workflow cpd_max_projection_distributed {
   # Create new load_data/load_data_with_illum csv files with the new projected images
   call util.filter_csv as script {
     input:
-      full_load_data_csv= load_data_directory + "/load_data.csv",
-      full_load_data_with_illum_csv= load_data_directory + "/load_data_with_illum.csv",
+      full_load_data_csv= load_data,
+      full_load_data_with_illum_csv= load_data_with_illum,
   }
 
   # Save load_data.csv file

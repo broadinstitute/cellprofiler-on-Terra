@@ -29,6 +29,8 @@ workflow cpd_analysis_pipeline {
   # Ensure paths do not end in a trailing slash
   String images_directory = sub(images_directory_gsurl, "/+$", "")
   String output_directory = sub(output_directory_gsurl, "/+$", "")
+  String illum_directory = sub(illum_directory_gsurl, "/+$", "")
+
 
   # Create an index to scatter
   call util.scatter_index as idx {
@@ -42,7 +44,7 @@ workflow cpd_analysis_pipeline {
     call util.splitto_scatter as sp {
       input:
         image_directory =  images_directory,
-        illum_directory = illum_directory_gsurl,
+        illum_directory = illum_directory,
         load_data_csv = load_data_csv,
         splitby_metadata = splitby_metadata,
         tiny_csv = "load_data_with_illum.csv",
