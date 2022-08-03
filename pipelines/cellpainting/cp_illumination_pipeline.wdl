@@ -34,8 +34,7 @@ workflow cp_illumination_pipeline {
   # Run CellProfiler pipeline
   call util.cellprofiler_pipeline_task as cellprofiler {
     input:
-      all_images_files=directory.file_array,  # from util.gsutil_ls task
-      load_data_csv= images_directory + "/load_data.csv",
+      all_images_files = directory.file_array,  # from util.gsutil_ls task
   }
 
   # Delocalize outputs and create new load_data/load_data_with_illum csv files with the new images
