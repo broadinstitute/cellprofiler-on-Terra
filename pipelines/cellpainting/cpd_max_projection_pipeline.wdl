@@ -23,7 +23,7 @@ workflow cpd_max_projection_distributed {
 
     # And the desired location of the outputs
     String output_directory_gsurl
-    String output_load_data_directory_gsurl = output_directory
+    String output_load_data_directory_gsurl = output_directory_gsurl
 
   }
 
