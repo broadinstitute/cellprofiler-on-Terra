@@ -25,13 +25,13 @@ workflow cellprofiler_pipeline {
   }
 
   # Ensure paths do not end in a trailing slash
-  String input_directory_gsurl = sub(input_directory_gsurl, "/+$", "")
-  String output_directory_gsurl = sub(output_directory_gsurl, "/+$", "")
+  String input_directory = sub(input_directory_gsurl, "/+$", "")
+  String output_directory = sub(output_directory_gsurl, "/+$", "")
 
   # Define the input files, so that we use Cromwell's automatic file localization
   call util.gsutil_ls as directory {
     input:
-      directory_gsurl=input_directory_gsurl,
+      directory_gsurl=input_directory,
       file_extension=file_extension,
   }
 
@@ -54,14 +54,14 @@ workflow cellprofiler_pipeline {
     call util.extract_and_gsutil_rsync {
       input:
         tarball=cellprofiler.tarball,
-        destination_gsurl=output_directory_gsurl,
+        destination_gsurl=output_directory,
     }
   }
 
   output {
     File tarball = cellprofiler.tarball
     File log = cellprofiler.log
-    String output_directory = output_directory_gsurl
+    String output_directory = output_directory
   }
 
 }
