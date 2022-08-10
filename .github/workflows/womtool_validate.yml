@@ -1,0 +1,15 @@
+name: 'Validate all WDLs using womtool'
+on: [pull_request]
+env:
+  CROMWELL_VERSION: 83
+jobs:
+  womtool-validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: ./.github/actions/install-cromwell
+        with:
+          CROMWELL_VERSION: ${{ env.CROMWELL_VERSION }}
+      - name: 'Run Scripts WDL Validation Test'
+        run: ./tests/validate_wdl.sh
+        shell: bash
