@@ -42,7 +42,7 @@ workflow cellprofiler_pipeline {
     call util.generate_load_data_csv as script {
       input:
         xml_file=xml_file,
-        stdout=directory.file_array,
+        stdout=directory.out,
     }
     String load_data_csv_file = script.load_data_csv
   }
@@ -50,7 +50,7 @@ workflow cellprofiler_pipeline {
   # Run CellProfiler pipeline
   call util.cellprofiler_pipeline_task as cellprofiler {
     input:
-      input_files=directory.file_array,  # from util.gsutil_ls task
+      input_files=read_lines(directory.out),  # from util.gsutil_ls_to_file task
       load_data_csv=load_data_csv_file,
   }
 
