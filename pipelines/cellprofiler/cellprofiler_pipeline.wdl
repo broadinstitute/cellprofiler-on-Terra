@@ -50,7 +50,7 @@ workflow cellprofiler_pipeline {
   }
 
   # Optionally delocalize outputs
-  if (output_directory_gsurl != "") {
+  if (output_directory != "") {
     call util.extract_and_gsutil_rsync {
       input:
         tarball=cellprofiler.tarball,
@@ -61,7 +61,7 @@ workflow cellprofiler_pipeline {
   output {
     File tarball = cellprofiler.tarball
     File log = cellprofiler.log
-    String output_directory = output_directory
+    String output_path = output_directory
   }
 
 }
