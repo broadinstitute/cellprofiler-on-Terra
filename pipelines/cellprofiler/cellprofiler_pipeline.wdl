@@ -50,7 +50,7 @@ workflow cellprofiler_pipeline {
   # Run CellProfiler pipeline
   call util.cellprofiler_pipeline_task as cellprofiler {
     input:
-      input_files=read_lines(directory.out),  # from util.gsutil_ls_to_file task
+      all_images_files=read_lines(directory.out),  # from util.gsutil_ls_to_file task
       load_data_csv=load_data_csv_file,
   }
 
