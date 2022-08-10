@@ -15,6 +15,7 @@ workflow cellprofiler_pipeline {
     # Specify input file information
     String input_directory_gsurl
     String? file_extension = ".tiff"
+    String? load_data_csv = ""  # leave blank to run generate_load_data_csv task
 
     # And the desired location of the outputs (optional)
     String output_directory_gsurl = ""
@@ -29,24 +30,28 @@ workflow cellprofiler_pipeline {
   String output_directory = sub(output_directory_gsurl, "/+$", "")
 
   # Define the input files, so that we use Cromwell's automatic file localization
-  call util.gsutil_ls as directory {
+  call util.gsutil_ls_to_file as directory {
     input:
       directory_gsurl=input_directory,
       file_extension=file_extension,
   }
 
-  # Create the load_data.csv file
-  call util.generate_load_data_csv as script {
-    input:
-      image_filename_array=directory.file_array,  # from util.gsutil_ls task
-      xml_file=xml_file,
+  # The load_data.csv file
+  String load_data_csv_file = load_data_csv
+  if (load_data_csv_file == "") {
+    call util.generate_load_data_csv as script {
+      input:
+        xml_file=xml_file,
+        stdout=directory.file_array,
+    }
+    String load_data_csv_file = script.load_data_csv
   }
 
   # Run CellProfiler pipeline
   call util.cellprofiler_pipeline_task as cellprofiler {
     input:
       input_files=directory.file_array,  # from util.gsutil_ls task
-      load_data_csv=script.load_data_csv,
+      load_data_csv=load_data_csv_file,
   }
 
   # Optionally delocalize outputs
