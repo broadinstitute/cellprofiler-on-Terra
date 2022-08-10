@@ -14,14 +14,14 @@ workflow cellprofiler_pipeline {
 
     # Specify input file information
     String input_directory_gsurl
-    String? file_extension = ".tiff"
-    String? load_data_csv = ""  # leave blank to run generate_load_data_csv task
+    String file_extension = ".tiff"
+    String load_data_csv = ""  # leave blank to run generate_load_data_csv task
 
     # And the desired location of the outputs (optional)
     String output_directory_gsurl = ""
 
     # The XML file from the microscope
-    String xml_file
+    String? xml_file  # this is only required if load_data_csv is not specified
 
   }
 
