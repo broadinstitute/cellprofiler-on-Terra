@@ -9,7 +9,5 @@ set -euxo pipefail
 WDL_FILES=$(find . -type f -name "*.wdl")
 
 for WDL in ${WDL_FILES}; do
-  echo "Validating ${WDL}"
   java -jar ${WOMTOOL_JAR} validate ${WDL}
-  echo "... success"
 done
