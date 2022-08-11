@@ -1,11 +1,10 @@
 FROM python:3.7
 
 LABEL maintainer="Stephen Fleming <sfleming@broadinstitute.org>"
-ENV CONDA_AUTO_UPDATE_CONDA=false
-ENV PATH="/home/user/miniconda/bin:${PATH}"
-ENV PATH="/home/user/miniconda/bin:/root/google-cloud-sdk/bin:${PATH}"
-ENV PATH="/software:${PATH}"
-ENV TMPDIR=/tmp
+
+ENV CONDA_AUTO_UPDATE_CONDA=false \
+    PATH="/home/user/miniconda/bin:/root/google-cloud-sdk/bin:/software:${PATH}" \
+    TMPDIR=/tmp
 
 # add a monitoring script
 ADD https://raw.githubusercontent.com/klarman-cell-observatory/cumulus/master/docker/monitor_script.sh \
@@ -22,5 +21,6 @@ RUN curl -so ~/miniconda.sh https://repo.anaconda.com/miniconda/Miniconda3-lates
  && chmod a+rx /software/monitor_script.sh \
  && pip install /software/cytominer-database \
  && pip install /software/pycytominer \
+ && pip install --no-cache-dir -U crcmod \
  && rm -rf ~/.cache/pip \
  && conda clean -ya

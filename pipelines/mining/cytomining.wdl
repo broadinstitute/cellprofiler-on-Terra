@@ -35,7 +35,7 @@ task profiling {
     String norm_filename = plate_id + "_normalized_" + aggregation_operation + ".csv"
 
     # Docker image
-    String docker_image = "us.gcr.io/broad-dsde-methods/cytomining:0.0.3"
+    String docker_image = "us.gcr.io/broad-dsde-methods/cytomining:0.0.4"
 
     # Hardware-related inputs
     Int? hardware_disk_size_GB = 500
