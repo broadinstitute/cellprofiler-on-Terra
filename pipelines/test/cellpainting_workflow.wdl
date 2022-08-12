@@ -84,7 +84,7 @@ workflow cellpainting_workflow {
   call cp_illumination_workflow.cp_illumination_pipeline as cp_illumination {
     input:
       images_directory_gsurl = cpd_max_projection.images_projected_directory_gsurl,
-      load_data_csv = cpd_max_projection.load_data_csv,
+      load_data = cpd_max_projection.load_data_csv,
       cppipe_file = illumination_cppipe_file,
   }
 
