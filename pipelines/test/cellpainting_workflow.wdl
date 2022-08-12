@@ -76,8 +76,8 @@ workflow cellpainting_workflow {
   call cpd_max_projection_workflow.cpd_max_projection_distributed as cpd_max_projection {
     input:
       images_directory_gsurl = images_directory_gsurl,
-      load_data = create_load_data.load_data,
-      load_data_with_illum = create_load_data.load_data_with_illum,
+      load_data = create_load_data.load_data_csv,
+      load_data_with_illum = create_load_data.load_data_with_illum_csv,
       cppipe_file = max_projection_cppipe_file,
       output_directory_gsurl = images_projected_output_directory_gsurl,
   }
@@ -86,7 +86,7 @@ workflow cellpainting_workflow {
   call cp_illumination_workflow.cp_illumination_pipeline as cp_illumination {
     input:
       images_directory_gsurl = cpd_max_projection.images_projected_directory_gsurl,
-      load_data_csv = cpd_max_projection.load_data,
+      load_data_csv = cpd_max_projection.load_data_csv,
       cppipe_file = illumination_cppipe_file,
   }
 
@@ -95,7 +95,7 @@ workflow cellpainting_workflow {
     input:
       images_directory_gsurl = cp_illumination.images_output_directory,
       # illum_directory_gsurl = cp_illumination.illum_output_directory,
-      load_data_csv = cpd_max_projection.load_data_with_illum,
+      load_data_csv = cpd_max_projection.load_data_with_illum_csv,
       cppipe_file = analysis_cppipe_file,
       output_directory_gsurl = segmentation_output_directory_gsurl,
   }
