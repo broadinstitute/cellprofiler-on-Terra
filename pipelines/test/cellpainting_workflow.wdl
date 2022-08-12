@@ -64,7 +64,7 @@ workflow cellpainting_workflow {
   # Creates the necessary load_data csv files for the rest of the CellProfiler steps to run
   call create_load_data_workflow.create_load_data as create_load_data {
     input:
-      directory_gsurl=images_directory_gsurl,
+      images_directory_gsurl=images_directory_gsurl,
       plate_id = plate_id,
       config_yaml = config_yaml,
       destination_directory_gsurl = load_data_destination_directory_gsurl,
