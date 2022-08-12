@@ -17,7 +17,7 @@ workflow create_load_data {
     String? file_extension = ".tiff"
 
     # Unique plate identifier
-    String? plate_id = "plate_id"
+    String plate_id = "plate_id"
 
     # The config.yml is created by the user, lets you name the channels you want to save,
     # and lets you pull metadata out of the image.
