@@ -109,5 +109,4 @@ workflow cellpainting_workflow {
       output_directory_gsurl = mining_directory_gsurl,
   }
 
-
-  }
+}
