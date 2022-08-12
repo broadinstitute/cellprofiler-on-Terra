@@ -44,7 +44,7 @@ workflow cp_illumination_pipeline {
   }
 
   # Delocalize outputs illum images
-  call util.extract_and_gsutil_rsync {
+  call util.extract_and_gsutil_rsync as rsync_illum {
     input:
       tarball=cellprofiler.tarball,
       destination_gsurl=output_illum_directory_gsurl,
@@ -52,7 +52,7 @@ workflow cp_illumination_pipeline {
 
   output {
     String images_output_directory = images_directory
-    String illum_output_directory = util.extract_and_gsutil_rsync.output_directory
+    String illum_output_directory = rsync_illum.output_directory
   }
 
 }
