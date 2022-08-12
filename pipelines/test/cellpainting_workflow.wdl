@@ -67,8 +67,6 @@ workflow cellpainting_workflow {
       directory_gsurl=images_directory_gsurl,
       plate_id = plate_id,
       config_yaml = config_yaml,
-      file_extension = file_extension,
-      config_yaml = config_yaml,
       destination_directory_gsurl = load_data_destination_directory_gsurl,
   }
 
