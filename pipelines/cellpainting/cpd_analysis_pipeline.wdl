@@ -18,6 +18,9 @@ workflow cpd_analysis_pipeline {
     File load_data_csv
     String illum_directory_gsurl = "${images_directory}/illum"
 
+    # Cellprofiler pipeline specification
+    File cppipe_file
+
     # Specify Metadata used to distribute the analysis: Well (default), Site..
     String splitby_metadata = "Metadata_Well"
 
@@ -54,6 +57,7 @@ workflow cpd_analysis_pipeline {
     call util.cellprofiler_pipeline_task as cellprofiler {
       input:
         all_images_files = sp.array_output,
+        cppipe_file =cppipe_file,
         load_data_csv = sp.output_tiny_csv,
     }
 
@@ -64,6 +68,8 @@ workflow cpd_analysis_pipeline {
     }
   }
 
-
+  output {
+    String segmentation_directory = output_directory,
+  }
 
 }

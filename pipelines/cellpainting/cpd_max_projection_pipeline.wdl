@@ -18,18 +18,21 @@ workflow cpd_max_projection_distributed {
     File load_data
     File load_data_with_illum
 
+    # Cellprofiler pipeline specification
+    File cppipe_file
+
     # Specify Metadata used to distribute the analysis: Well (default), Site..
     String splitby_metadata = "Metadata_Well"
 
     # And the desired location of the outputs
-    String output_directory_gsurl
-    String output_load_data_directory_gsurl = output_directory_gsurl
+    String output_images_directory_gsurl
+    String output_load_data_directory_gsurl = output_images_directory_gsurl
 
   }
 
   # Ensure paths do not end in a trailing slash
   String images_directory = sub(images_directory_gsurl, "/+$", "")
-  String output_directory = sub(output_directory_gsurl, "/+$", "")
+  String output_directory = sub(output_images_directory_gsurl, "/+$", "")
   String output_load_data_directory = sub(output_load_data_directory_gsurl, "/+$", "")
 
 
@@ -55,13 +58,14 @@ workflow cpd_max_projection_distributed {
     call util.cellprofiler_pipeline_task as cellprofiler {
       input:
         all_images_files = sp.array_output,
+        cppipe_file = cppipe_file,
         load_data_csv = sp.output_tiny_csv,
     }
 
     call util.extract_and_gsutil_rsync {
       input:
         tarball=cellprofiler.tarball,
-        destination_gsurl=output_directory,
+        destination_gsurl=output_images_directory_gsurl,
     }
   }
 
@@ -84,6 +88,12 @@ workflow cpd_max_projection_distributed {
     input:
       file=script.load_data_with_illum_csv,
       destination_gsurl=output_load_data_directory,
+  }
+
+  output {
+    String images_projected_directory_gsurl = output_images_directory_gsurl
+    File load_data_csv = script.load_data_csv
+    File load_data_with_illum_csv = script.load_data_with_illum_csv
   }
 
 }
