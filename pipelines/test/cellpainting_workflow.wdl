@@ -5,7 +5,7 @@
 version 1.0
 
 import "../cellpainting/create_load_data.wdl" as create_load_data_workflow
-import "../cellpainting/cpd_max_projection_distributed.wdl" as cpd_max_projection_workflow
+import "../cellpainting/cpd_max_projection_pipeline.wdl" as cpd_max_projection_workflow
 import "../cellpainting/cp_illumination_pipeline.wdl" as cp_illumination_workflow
 import "../cellpainting/cpd_analysis_pipeline.wdl" as cpd_analysis_workflow
 import "../mining/cytomining.wdl" as cytomining_workflow
