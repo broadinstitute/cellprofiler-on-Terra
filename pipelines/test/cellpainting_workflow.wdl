@@ -77,7 +77,7 @@ workflow cellpainting_workflow {
       load_data = create_load_data.load_data_csv,
       load_data_with_illum = create_load_data.load_data_with_illum_csv,
       cppipe_file = max_projection_cppipe_file,
-      output_directory_gsurl = images_projected_output_directory_gsurl,
+      output_images_directory_gsurl = images_projected_output_directory_gsurl,
   }
 
   # Run illumination correction pipeline
