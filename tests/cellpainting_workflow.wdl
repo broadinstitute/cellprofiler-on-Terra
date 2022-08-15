@@ -4,11 +4,11 @@
 
 version 1.0
 
-import "./pipelines/cellpainting/create_load_data.wdl" as create_load_data_workflow
-import "./pipelines/cellpainting/cpd_max_projection_pipeline.wdl" as cpd_max_projection_workflow
-import "./pipelines/cellpainting/cp_illumination_pipeline.wdl" as cp_illumination_workflow
-import "./pipelines/cellpainting/cpd_analysis_pipeline.wdl" as cpd_analysis_workflow
-import "./pipelines/mining/cytomining.wdl" as cytomining_workflow
+import "../pipelines/cellpainting/create_load_data.wdl" as create_load_data_workflow
+import "../pipelines/cellpainting/cpd_max_projection_pipeline.wdl" as cpd_max_projection_workflow
+import "../pipelines/cellpainting/cp_illumination_pipeline.wdl" as cp_illumination_workflow
+import "../pipelines/cellpainting/cpd_analysis_pipeline.wdl" as cpd_analysis_workflow
+import "../pipelines/mining/cytomining.wdl" as cytomining_workflow
 
 
 workflow cellpainting_workflow {
