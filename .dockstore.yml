@@ -15,6 +15,3 @@ workflows:
   - subclass: WDL
     primaryDescriptorPath: /pipelines/mining/cytomining.wdl
     name: cytomining
-  - subclass: WDL
-    primaryDescriptorPath: /tests/cellpainting_workflow.wdl
-    name: cellpainting
