@@ -4,11 +4,11 @@
 
 version 1.0
 
-import "../cellpainting/create_load_data.wdl" as create_load_data_workflow
-import "../cellpainting/cpd_max_projection_pipeline.wdl" as cpd_max_projection_workflow
-import "../cellpainting/cp_illumination_pipeline.wdl" as cp_illumination_workflow
-import "../cellpainting/cpd_analysis_pipeline.wdl" as cpd_analysis_workflow
-import "../mining/cytomining.wdl" as cytomining_workflow
+import "./pipelines/cellpainting/create_load_data.wdl" as create_load_data_workflow
+import "./pipelines/cellpainting/cpd_max_projection_pipeline.wdl" as cpd_max_projection_workflow
+import "./pipelines/cellpainting/cp_illumination_pipeline.wdl" as cp_illumination_workflow
+import "./pipelines/cellpainting/cpd_analysis_pipeline.wdl" as cpd_analysis_workflow
+import "./pipelines/mining/cytomining.wdl" as cytomining_workflow
 
 
 workflow cellpainting_workflow {
@@ -49,7 +49,7 @@ workflow cellpainting_workflow {
     # Cellprofiler pipeline specification
     File analysis_cppipe_file
     # And the desired location of the segmentation csv files (outputs)
-    String segmentation_output_directory_gsurl
+    String analysis_output_directory_gsurl
 
     ####################################
     #### arguments for cytomining ####
@@ -95,13 +95,13 @@ workflow cellpainting_workflow {
       # illum_directory_gsurl = cp_illumination.illum_output_directory,
       load_data_csv = cpd_max_projection.load_data_with_illum_csv,
       cppipe_file = analysis_cppipe_file,
-      output_directory_gsurl = segmentation_output_directory_gsurl,
+      output_directory_gsurl = analysis_output_directory_gsurl,
   }
 
   # Run cytomining
   call cytomining_workflow.cytomining as cytomining {
     input:
-      cellprofiler_analysis_directory_gsurl = cpd_analysis.segmentation_directory,
+      cellprofiler_analysis_directory_gsurl = cpd_analysis.analysis_output_directory,
       plate_id = plate_id,
       plate_map_file = plate_map_file,
       output_directory_gsurl = mining_directory_gsurl,

@@ -69,7 +69,7 @@ workflow cpd_analysis_pipeline {
   }
 
   output {
-    String segmentation_directory = output_directory
+    String analysis_output_directory = output_directory
   }
 
 }

@@ -17,4 +17,4 @@ workflows:
     name: cytomining
   - subclass: WDL
     primaryDescriptorPath: /pipelines/test/cellpainting_workflow.wdl
-    name: cytomining
+    name: cellpainting
