@@ -35,7 +35,7 @@ backends, specifically cloud storage locations, in the future, including AWS and
 ## How to run these workflows yourself
 
 These workflows are all publicly available, and 
-[hosted in Dockstore](https://dockstore.org/workflows/github.com/broadinstitute/cellprofiler-on-Terra). 
+[hosted in Dockstore](https://dockstore.org/search?entryType=workflows&search=broadinstitute%2Fcellprofiler-on-terra). 
 From there, you can import and run the workflows in [Terra](https://app.terra.bio) or any other 
 place you like to run [WDL workflows](https://github.com/openwdl/wdl).
 
