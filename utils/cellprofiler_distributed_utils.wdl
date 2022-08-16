@@ -128,7 +128,7 @@ task generate_load_data_csv {
     File? xml_file
     File config_yaml
     File stdout
-    String plate_id = "plate_id"
+    String plate_id
     String? illum_dir = "/cromwell_root/illum"
 
     # Docker image

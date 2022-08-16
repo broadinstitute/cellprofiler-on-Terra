@@ -15,6 +15,10 @@ workflow cp_illumination_pipeline {
     # Specify input file information
     String images_directory_gsurl
     String? file_extension = ".tiff"
+    File load_data
+
+    # Cellprofiler pipeline specification
+    File cppipe_file
 
     # And the desired location of the outputs (optional)
     String output_illum_directory_gsurl = "${images_directory}/illum"
@@ -35,14 +39,20 @@ workflow cp_illumination_pipeline {
   call util.cellprofiler_pipeline_task as cellprofiler {
     input:
       all_images_files = directory.file_array,  # from util.gsutil_ls task
+      cppipe_file = cppipe_file,
+      load_data_csv = load_data
   }
 
-  # Delocalize outputs and create new load_data/load_data_with_illum csv files with the new images
-
-  call util.extract_and_gsutil_rsync {
+  # Delocalize outputs illum images
+  call util.extract_and_gsutil_rsync as rsync_illum {
     input:
       tarball=cellprofiler.tarball,
       destination_gsurl=output_illum_directory_gsurl,
+  }
+
+  output {
+    String images_output_directory = images_directory
+    String illum_output_directory = rsync_illum.output_directory
   }
 
 }

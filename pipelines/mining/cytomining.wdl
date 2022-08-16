@@ -180,8 +180,23 @@ task profiling {
 
 
 workflow cytomining {
+  input {
+    String cellprofiler_analysis_directory_gsurl
+    String plate_id
 
-  call profiling {}
+    # Pycytominer annotation step
+    File plate_map_file
+
+    # Desired location of the outputs
+    String output_directory_gsurl
+  }
+  call profiling {
+    input:
+        cellprofiler_analysis_directory_gsurl = cellprofiler_analysis_directory_gsurl,
+        plate_id = plate_id,
+        plate_map_file = plate_map_file,
+        output_directory_gsurl = output_directory_gsurl,
+  }
 
   output {
     File monitoring_log = profiling.monitoring_log

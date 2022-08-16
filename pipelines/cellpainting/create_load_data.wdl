@@ -16,6 +16,13 @@ workflow create_load_data {
     String images_directory_gsurl
     String? file_extension = ".tiff"
 
+    # Unique plate identifier
+    String plate_id = "plate_id"
+
+    # The config.yml is created by the user, lets you name the channels you want to save,
+    # and lets you pull metadata out of the image.
+    File config_yaml
+
     # Output directory, used to be the same than images directory:
     String destination_directory_gsurl
 
@@ -37,6 +44,8 @@ workflow create_load_data {
   call util.generate_load_data_csv as script {
     input:
       xml_file = images_directory + "/Index.idx.xml",
+      config_yaml = config_yaml,
+      plate_id = plate_id,
       stdout = directory.out
   }
 
