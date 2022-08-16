@@ -24,3 +24,7 @@ RUN chmod a+rx /software/monitor_script.sh \
  && pip3 install cytominer-database==0.3.4 \
  && pip3 install pycytominer==0.2.0 \
  && rm -rf ~/.cache/pip
+
+# install sqlite3 \
+RUN apt-get update && apt-get install -y --no-install-recommends sqlite3 \
+ && rm -rf /var/lib/apt/lists/*
