@@ -16,6 +16,9 @@ workflow cellprofiler_pipeline {
     String input_directory_gsurl
     String file_extension = ".tiff"
     String load_data_csv = ""  # leave blank to run generate_load_data_csv task
+    
+    # Cellprofiler pipeline 
+    File cppipe_file
 
     # And the desired location of the outputs (optional)
     String output_directory_gsurl = ""
@@ -58,6 +61,7 @@ workflow cellprofiler_pipeline {
       input:
         all_images_files=read_lines(directory.out),
         load_data_csv=load_data_csv_file,
+        cppipe_file=cppipe_file,
     }
 
     # Optionally delocalize outputs
@@ -97,6 +101,7 @@ workflow cellprofiler_pipeline {
         input:
           all_images_files=sp.array_output,
           load_data_csv=sp.output_tiny_csv,
+          cppipe_file=cppipe_file
       }
 
       # Optionally delocalize outputs
