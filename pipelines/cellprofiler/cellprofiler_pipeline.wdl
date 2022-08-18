@@ -63,14 +63,14 @@ workflow cellprofiler_pipeline {
 
     # Optionally delocalize outputs
     if (output_directory_gsurl != "") {
-      call util.extract_and_gsutil_rsync {
+      call util.extract_and_gsutil_rsync as extract_and_gsutil_rsync {
         input:
           tarball=cellprofiler.tarball,
           destination_gsurl=output_directory,
       }
     }
-    Array[String] output_tarball_array = [cellprofiler.tarball]
-    Array[String] output_log_array = [cellprofiler.log]
+    Array[String]? output_tarball_array_single = [cellprofiler.tarball]
+    Array[String]? output_log_array_single = [cellprofiler.log]
 
   }
 
@@ -94,7 +94,7 @@ workflow cellprofiler_pipeline {
           index=index,
       }
 
-      call util.cellprofiler_pipeline_task as cellprofiler {
+      call util.cellprofiler_pipeline_task as cellprofiler_scattered {
         input:
           all_images_files=sp.array_output,
           load_data_csv=sp.output_tiny_csv,
@@ -102,18 +102,20 @@ workflow cellprofiler_pipeline {
 
       # Optionally delocalize outputs
       if (output_directory_gsurl != "") {
-        call util.extract_and_gsutil_rsync {
+        call util.extract_and_gsutil_rsync as extract_and_gsutil_rsync_scattered {
           input:
-            tarball=cellprofiler.tarball,
+            tarball=cellprofiler_scattered.tarball,
             destination_gsurl=output_directory + "/" + index,
         }
       }
 
     }
-    Array[String] output_tarball_array = cellprofiler.tarball
-    Array[String] output_log_array = cellprofiler.log
+    Array[String]? output_tarball_array_scattered = cellprofiler_scattered.tarball
+    Array[String]? output_log_array_scattered = cellprofiler_scattered.log
 
   }
+  Array[String] output_tarball_array = select_first([output_tarball_array_single, output_tarball_array_scattered])
+  Array[String] output_log_array = select_first([output_log_array_single, output_log_array_scattered])
 
   output {
     File tarballs = output_tarball_array
