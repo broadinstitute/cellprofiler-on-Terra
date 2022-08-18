@@ -79,7 +79,7 @@ workflow cellprofiler_pipeline {
     # Create an index to scatter
     call util.scatter_index as idx {
       input:
-        load_data_csv=script.load_data_csv,
+        load_data_csv=load_data_csv_file,
         splitby_metadata=splitby_metadata,
     }
 
@@ -89,7 +89,7 @@ workflow cellprofiler_pipeline {
       call util.splitto_scatter as sp {
         input:
           image_directory=input_directory,
-          load_data_csv=script.load_data_csv,
+          load_data_csv=load_data_csv_file,
           splitby_metadata=splitby_metadata,
           index=index,
       }
