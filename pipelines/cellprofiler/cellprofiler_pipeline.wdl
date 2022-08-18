@@ -32,7 +32,7 @@ workflow cellprofiler_pipeline {
     String output_directory = sub(output_directory_gsurl, "/+$", "")
 
   }
-  Boolean do_scatter = splitby_metadata == ""  # true if splitby_metadata is empty
+  Boolean do_scatter = (splitby_metadata != "")  # true if splitby_metadata is not empty
 
   # Define the input files, so that we use Cromwell's automatic file localization
   call util.gsutil_ls_to_file as directory {
@@ -69,6 +69,8 @@ workflow cellprofiler_pipeline {
           destination_gsurl=output_directory,
       }
     }
+    Array[String] output_tarball_array = [cellprofiler.tarball]
+    Array[String] output_log_array = [cellprofiler.log]
 
   }
 
@@ -87,10 +89,8 @@ workflow cellprofiler_pipeline {
       call util.splitto_scatter as sp {
         input:
           image_directory=input_directory,
-#          illum_directory=input_directory + "/illum",
           load_data_csv=script.load_data_csv,
           splitby_metadata=splitby_metadata,
-          tiny_csv="load_data.csv",
           index=index,
       }
 
@@ -110,12 +110,14 @@ workflow cellprofiler_pipeline {
       }
 
     }
+    Array[String] output_tarball_array = cellprofiler.tarball
+    Array[String] output_log_array = cellprofiler.log
 
   }
 
   output {
-    File tarball = if do_scatter then "none" else cellprofiler.tarball
-    File log = if do_scatter then "none" else cellprofiler.log
+    File tarballs = output_tarball_array
+    File logs = output_log_array
     String output_path = output_directory
   }
 

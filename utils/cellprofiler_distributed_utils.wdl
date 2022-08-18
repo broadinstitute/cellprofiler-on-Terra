@@ -245,7 +245,7 @@ task splitto_scatter {
     Int hardware_memory_GB = 15
     Int hardware_cpu_count = 4
 
-    String tiny_csv
+    String tiny_csv = "load_data.csv"
     String filename_text = "filename_array.text"
   }
 
