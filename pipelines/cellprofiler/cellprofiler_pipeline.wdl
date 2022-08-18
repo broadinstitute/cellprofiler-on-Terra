@@ -21,9 +21,7 @@ workflow cellprofiler_pipeline {
     String output_directory_gsurl = ""
 
     # The XML file from the microscope
-    String? xml_file  # this is only required if load_data_csv is not specified
-
-  }
+    String xml_file
 
     # Specify Metadata used to distribute the analysis: Well (default), Site...
     # An empty string "" will use a single VM
