@@ -42,15 +42,14 @@ workflow cellprofiler_pipeline {
   }
 
   # The load_data.csv file
-  String load_data_csv_file = load_data_csv
-  if (load_data_csv_file == "") {
+  if (load_data_csv == "") {
     call util.generate_load_data_csv as script {
       input:
         xml_file=xml_file,
         stdout=directory.out,
     }
-    String load_data_csv_file = script.load_data_csv
   }
+  String load_data_csv_file = select_first(script.load_data_csv, load_data_csv)
 
   if (!do_scatter) {
 
