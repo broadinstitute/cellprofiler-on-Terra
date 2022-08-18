@@ -49,7 +49,7 @@ workflow cellprofiler_pipeline {
         stdout=directory.out,
     }
   }
-  String load_data_csv_file = select_first(script.load_data_csv, load_data_csv)
+  String load_data_csv_file = select_first([script.load_data_csv, load_data_csv])
 
   if (!do_scatter) {
 
@@ -117,8 +117,8 @@ workflow cellprofiler_pipeline {
   Array[String] output_log_array = select_first([output_log_array_single, output_log_array_scattered])
 
   output {
-    File tarballs = output_tarball_array
-    File logs = output_log_array
+    Array[File] tarballs = output_tarball_array
+    Array[File] logs = output_log_array
     String output_path = output_directory
   }
 
