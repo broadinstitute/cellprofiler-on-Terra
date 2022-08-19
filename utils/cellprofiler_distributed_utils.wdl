@@ -245,7 +245,7 @@ task splitto_scatter {
     Int hardware_memory_GB = 15
     Int hardware_cpu_count = 4
 
-    String tiny_csv
+    String tiny_csv = "load_data.csv"
     String filename_text = "filename_array.text"
   }
 
@@ -253,13 +253,13 @@ task splitto_scatter {
     pip install pandas ipython numpy click
 
     python /scripts/cpd_utils.py splitto-scatter \
-      --image-directory ~{image_directory} \
-      --illum-directory ~{illum_directory} \
-      --csv-file ~{load_data_csv} \
-      --splitby-metadata ~{splitby_metadata} \
-      --index ~{index} \
-      --output-text ~{filename_text} \
-      --output-csv ~{tiny_csv}
+      ~{"--image-directory " + image_directory} \
+      ~{"--illum-directory " + illum_directory} \
+      ~{"--csv-file " + load_data_csv} \
+      ~{"--splitby-metadata " + splitby_metadata} \
+      ~{"--index " + index} \
+      ~{"--output-text " + filename_text} \
+      ~{"--output-csv " + tiny_csv}
 
   }
 
