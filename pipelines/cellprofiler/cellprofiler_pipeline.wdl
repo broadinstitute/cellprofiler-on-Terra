@@ -24,7 +24,8 @@ workflow cellprofiler_pipeline {
     String output_directory_gsurl = ""
 
     # Specify Metadata used to distribute the analysis: Well (default), Site...
-    # An empty string "" will use a single VM
+    # If do_scatter is false, this will run on a single VM and ignore splitby_metadata
+    Boolean do_scatter
     String splitby_metadata = "Metadata_Well"
     
     # Optional input: directory containing the .npy illumination correction images
@@ -43,7 +44,7 @@ workflow cellprofiler_pipeline {
   }
 
   # The single VM workflow
-  if (splitby_metadata == "") {
+  if (!do_scatter) {
 
     # Run CellProfiler pipeline
     call util.cellprofiler_pipeline_task as cellprofiler {
@@ -67,7 +68,7 @@ workflow cellprofiler_pipeline {
   }
 
   # The distributed workflow, running in parallel on many VMs
-  if (splitby_metadata != "") {
+  if (do_scatter) {
 
     # Create an index to scatter
     call util.scatter_index as idx {
