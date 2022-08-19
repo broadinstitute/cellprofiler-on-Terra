@@ -2,9 +2,11 @@ import click
 import pandas as pd
 import numpy as np
 
+
 @click.group()
 def cli(*args, **kwargs):
     pass
+
 
 @cli.command()
 @click.option(
@@ -56,7 +58,6 @@ def splitto_scatter(image_directory: str, illum_directory: str, csv_file: str, s
     else:
         images_col = [col for col in df if (col.startswith('FileName'))]
 
-
     # Attached bucket folder name to the images
     for col in images_col:
         df[col] = df[col].apply(lambda x: f"{image_directory}/{x}")
@@ -87,11 +88,17 @@ def splitto_scatter(image_directory: str, illum_directory: str, csv_file: str, s
 @click.option("--output-file", type=str, default="unique_ids.txt", help="Output file location.")
 def scatter_index(csv_file: str, splitby_metadata: str, output_file: str) -> None:
     df = pd.read_csv(csv_file)
+    assert splitby_metadata in df.columns, \
+        f'''splitby_metadata is {splitby_metadata}, but this is not one of the 
+        columns of load_data.csv: valid columns are {df.columns.tolist()}. 
+        either specify an existing column for splitby_metadata, or include 
+        a new column called {splitby_metadata} in your load_data.csv file.'''
     unique_ids = list(df[splitby_metadata].unique().astype(str))
     print("\n".join(unique_ids))
     with open(output_file, 'w') as filehandle:
         for listitem in unique_ids:
             filehandle.write('%s\n' % listitem)
+
 
 if __name__ == "__main__":
     cli()
