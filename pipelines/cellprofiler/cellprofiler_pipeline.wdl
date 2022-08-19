@@ -25,7 +25,7 @@ workflow cellprofiler_pipeline {
 
     # Specify Metadata used to distribute the analysis: Well (default), Site...
     # If do_scatter is false, this will run on a single VM and ignore splitby_metadata
-    Boolean do_scatter
+    Boolean do_scatter = true
     String splitby_metadata = "Metadata_Well"
     
     # Optional input: directory containing the .npy illumination correction images
