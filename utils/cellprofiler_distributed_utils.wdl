@@ -132,7 +132,7 @@ task generate_load_data_csv {
     String? illum_dir = "/cromwell_root/illum"
 
     # Docker image
-    String docker_image = "us.gcr.io/broad-dsde-methods/python_cellprofiler_on_terra:0.0.2"
+    String docker_image = "us.gcr.io/broad-dsde-methods/python_cellprofiler_on_terra:0.0.3"
 
     # Hardware-related inputs
     Int hardware_disk_size_GB = 50
@@ -188,7 +188,7 @@ task scatter_index {
     String splitby_metadata
 
     # Docker image
-    String docker_image = "us.gcr.io/broad-dsde-methods/python_cellprofiler_on_terra:0.0.2"
+    String docker_image = "us.gcr.io/broad-dsde-methods/python_cellprofiler_on_terra:0.0.3"
 
     # Hardware-related inputs
     Int hardware_disk_size_GB = 50
@@ -238,7 +238,7 @@ task splitto_scatter {
     String index
 
     # Docker image
-    String docker_image = "us.gcr.io/broad-dsde-methods/python_cellprofiler_on_terra:0.0.2"
+    String docker_image = "us.gcr.io/broad-dsde-methods/python_cellprofiler_on_terra:0.0.3"
 
     # Hardware-related inputs
     Int hardware_disk_size_GB = 50
@@ -290,7 +290,7 @@ task filter_csv {
     File? full_load_data_with_illum_csv
 
     # Docker image
-    String docker_image = "us.gcr.io/broad-dsde-methods/python_cellprofiler_on_terra:0.0.2"
+    String docker_image = "us.gcr.io/broad-dsde-methods/python_cellprofiler_on_terra:0.0.3"
 
     # Hardware-related inputs
     Int hardware_disk_size_GB = 50
