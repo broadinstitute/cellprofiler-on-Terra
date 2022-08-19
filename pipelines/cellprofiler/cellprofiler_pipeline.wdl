@@ -51,6 +51,11 @@ workflow cellprofiler_pipeline {
 
   # The load_data.csv file
   if (load_data_csv == "") {
+    if (config_yaml == "") {
+      echo "ERROR: Missing load_data.csv or config.yml (to generate it)."
+      echo "Provide either the load_data csv file or the necessary config yaml to generate it and try again"
+      exit 1
+    }
     call util.generate_load_data_csv as script {
       input:
         xml_file=xml_file,
