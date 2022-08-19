@@ -16,6 +16,8 @@ workflow cellprofiler_pipeline {
     String input_directory_gsurl
     String file_extension = ".tiff"
     String load_data_csv = ""  # leave blank to run generate_load_data_csv task
+    String config_yaml = ""
+    String plate_id = ""
     
     # Cellprofiler pipeline 
     File cppipe_file
@@ -33,6 +35,9 @@ workflow cellprofiler_pipeline {
     # Ensure paths do not end in a trailing slash
     String input_directory = sub(input_directory_gsurl, "/+$", "")
     String output_directory = sub(output_directory_gsurl, "/+$", "")
+    
+    # Optional input: directory containing the .nyp illumination correction images
+    String illum_directory = "${input_directory}/illum"
 
   }
   Boolean do_scatter = (splitby_metadata != "")  # true if splitby_metadata is not empty
@@ -50,6 +55,8 @@ workflow cellprofiler_pipeline {
       input:
         xml_file=xml_file,
         stdout=directory.out,
+        config_yaml=config_yaml,
+        plate_id=plate_id,  
     }
   }
   String load_data_csv_file = select_first([script.load_data_csv, load_data_csv])
@@ -92,6 +99,7 @@ workflow cellprofiler_pipeline {
       call util.splitto_scatter as sp {
         input:
           image_directory=input_directory,
+          illum_directory=illum_directory,
           load_data_csv=load_data_csv_file,
           splitby_metadata=splitby_metadata,
           index=index,
