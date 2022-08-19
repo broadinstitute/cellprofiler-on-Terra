@@ -83,6 +83,61 @@ task gsutil_ls_to_file{
 
 }
 
+task gcloud_assert_write_permission {
+
+  input {
+    Array[String] gsurls
+  }
+
+  command <<<
+
+    bearer=$(gcloud auth application-default print-access-token)
+
+    for gsurl in ~{gsurls}; do
+
+        # Check that we have a valid google bucket path
+        if [[ ${gsurl} != "gs://"* ]]; then
+            echo "Bad gsURL: '${gsurl}' must begin with 'gs://' to be a valid google bucket path."
+            exit 4
+        fi
+
+        # Make an API call
+        bucket=$(dirname "${gsurl}")
+        bucket_name="${bucket#gs://}"
+        api_call="https://storage.googleapis.com/storage/v1/b/${bucket_name}/iam/testPermissions?permissions=storage.objects.create"
+        curl "${api_call}" --header "Authorization: Bearer $bearer" --header "Accept: application/json" --compressed > response.json
+
+        # Print the response
+        cat response.json
+
+        # Parse the response in python
+        python_json_parsing="import sys, json; print(str(json.load(sys.stdin)['permissions'][0] == 'storage.objects.create').lower())"
+        permission=$(cat response.json | python3 -c "${python_json_parsing}")
+        echo "Permission: ${permission}"
+
+        # Exit status 3 if the user lacks write permission, and explain the error
+        if [[ ! $permission ]]; then
+            echo "The specified gsURL ${gsurl} cannot be written to. You need storage.objects.create permission on the bucket $bucket"
+            exit 3
+        fi
+
+    done
+
+    exit 0
+
+  >>>
+
+  runtime {
+    docker: "python:3.7"
+    disks: "local-disk 50 HDD"
+    memory: "2G"
+    cpu: 1
+    maxRetries: 1
+    preemptible: 0
+  }
+
+}
+
 task gsutil_delocalize {
 
   input {
