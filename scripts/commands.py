@@ -185,7 +185,7 @@ class DocContentHandler(xml.sax.handler.ContentHandler):
         pass
 
 
-def convert_to_dataframe(images, plates, wells, channels, metadata, paths) -> pd.DataFrame:
+def convert_to_dataframe(images, plates, wells, channels, metadata, paths, config_yaml) -> pd.DataFrame:
     header = sum(
         [
             ["_".join((prefix, channels[channel])) for prefix in ["FileName", "PathName"]]
@@ -210,7 +210,10 @@ def convert_to_dataframe(images, plates, wells, channels, metadata, paths) -> pd
                     # writing out field_id.
                     field_id = "%02d-%02d" %(int(image.metadata["FieldID"]), int(image.metadata.get("PlaneID", 1)))
                     channel = image.channel_name
-                    assert channel in channels
+                    assert channel in channels, f'''{channel} is not one of the 
+                        channels found in config file {config_yaml}: 
+                        {channels}.\nCorrect the list of channels in the config 
+                        file and try again.'''
                     if field_id not in fields:
                         fields[field_id] = { channel: image }
                     else:
@@ -256,7 +259,6 @@ def load_config(config_file):
 @click.group()
 def cli(*args, **kwargs):
     pass
-
 
 
 @cli.command()
@@ -312,7 +314,7 @@ def pe2_load_data(
     channels, metadata = load_config(config_yaml)
     channels = dict([(str(k).replace(" ", ""), v) for (k, v) in channels.items()])
 
-    df = convert_to_dataframe(images, plates, wells, channels, metadata, paths)
+    df = convert_to_dataframe(images, plates, wells, channels, metadata, paths, config_yaml)
     df.to_csv(output_file, index=False)
 
 
@@ -389,6 +391,7 @@ def write_csv(writer, channels, illum_directory, plate_id, nrows, illum_filetype
                    channel in  sorted(channels.values())], [])
         
     writer.writerows([row] * nrows)
+
 
 if __name__ == "__main__":
     cli()
