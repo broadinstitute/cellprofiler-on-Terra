@@ -34,6 +34,11 @@ workflow cpd_analysis_pipeline {
   String output_directory = sub(output_directory_gsurl, "/+$", "")
   String illum_directory = sub(illum_directory_gsurl, "/+$", "")
 
+  # Assert write permission for output_directory
+  call util.gcloud_assert_write_permission {
+    input:
+      gsurls=[output_directory],
+  }
 
   # Create an index to scatter
   call util.scatter_index as idx {

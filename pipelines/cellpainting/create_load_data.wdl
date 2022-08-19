@@ -32,6 +32,11 @@ workflow create_load_data {
   String images_directory = sub(images_directory_gsurl, "/+$", "")
   String destination_directory = sub(destination_directory_gsurl, "/+$", "")
 
+  # Assert write permission for destination_directory
+  call util.gcloud_assert_write_permission {
+    input:
+      gsurls=[destination_directory],
+  }
 
   # Define the input files, so that we use Cromwell's automatic file localization
   call util.gsutil_ls_to_file as directory {

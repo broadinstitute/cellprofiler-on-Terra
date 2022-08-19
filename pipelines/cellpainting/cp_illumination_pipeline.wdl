@@ -27,6 +27,13 @@ workflow cp_illumination_pipeline {
 
   # Ensure paths do not end in a trailing slash
   String images_directory = sub(images_directory_gsurl, "/+$", "")
+  String output_illum_directory = sub(output_illum_directory_gsurl, "/+$", "")
+
+  # Assert write permission for output_illum_directory
+  call util.gcloud_assert_write_permission {
+    input:
+      gsurls=[output_illum_directory],
+  }
 
   # Define the input files, so that we use Cromwell's automatic file localization
   call util.gsutil_ls as directory {
@@ -47,7 +54,7 @@ workflow cp_illumination_pipeline {
   call util.extract_and_gsutil_rsync as rsync_illum {
     input:
       tarball=cellprofiler.tarball,
-      destination_gsurl=output_illum_directory_gsurl,
+      destination_gsurl=output_illum_directory,
   }
 
   output {
