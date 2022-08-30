@@ -91,7 +91,9 @@ task gcloud_assert_write_permission {
 
   command <<<
 
+    set -e
     bearer=$(gcloud auth application-default print-access-token)
+    set +e
 
     for gsurl in ~{sep=" " gsurls}; do
 
@@ -111,13 +113,14 @@ task gcloud_assert_write_permission {
         cat response.json
 
         # Parse the response in python
-        python_json_parsing="import sys, json; print(str(json.load(sys.stdin)['permissions'][0] == 'storage.objects.create').lower())"
-        permission=$(cat response.json | python3 -c "${python_json_parsing}")
+        python_json_parsing="import sys, json; print(str(json.load(sys.stdin).get('permissions', ['none'])[0] == 'storage.objects.create').lower())"
+        permission=$(cat response.json | python -c "${python_json_parsing}")
         echo "Permission: ${permission}"
 
         # Exit status 3 if the user lacks write permission, and explain the error
-        if [[ ! $permission ]]; then
-            echo "The specified gsURL ${gsurl} cannot be written to. You need storage.objects.create permission on the bucket $bucket"
+        if [[ $permission == false ]]; then
+            echo "The specified gsURL ${gsurl} cannot be written to."
+            echo "You need storage.objects.create permission on the bucket ${bucket}"
             exit 3
         fi
 
@@ -128,11 +131,11 @@ task gcloud_assert_write_permission {
   >>>
 
   runtime {
-    docker: "python:3.7"
+    docker: "us.gcr.io/broad-dsde-methods/google-cloud-sdk:alpine"
     disks: "local-disk 50 HDD"
     memory: "2G"
     cpu: 1
-    maxRetries: 1
+    maxRetries: 0
     preemptible: 0
   }
 
