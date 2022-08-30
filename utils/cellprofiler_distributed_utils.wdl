@@ -93,7 +93,7 @@ task gcloud_assert_write_permission {
 
     bearer=$(gcloud auth application-default print-access-token)
 
-    for gsurl in ~{gsurls}; do
+    for gsurl in ~{sep=" " gsurls}; do
 
         # Check that we have a valid google bucket path
         if [[ ${gsurl} != "gs://"* ]]; then
