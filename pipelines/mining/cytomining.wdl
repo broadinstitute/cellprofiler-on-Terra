@@ -1,7 +1,5 @@
 version 1.0
 
-import "../../utils/cellprofiler_distributed_utils.wdl" as util
-
 ## Copyright Broad Institute, 2021
 ##
 ## LICENSING :
@@ -195,12 +193,6 @@ workflow cytomining {
 
     # Desired location of the outputs
     String output_directory_gsurl
-  }
-
-  # Assert write permission for output_illum_directory
-  call util.gcloud_assert_write_permission {
-    input:
-      gsurls=[output_directory_gsurl],
   }
 
   call profiling {
