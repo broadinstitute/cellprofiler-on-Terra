@@ -93,7 +93,6 @@ task gcloud_assert_write_permission {
 
     set -e
     bearer=$(gcloud auth application-default print-access-token)
-    set +e
 
     for gsurl in ~{sep=" " gsurls}; do
 
@@ -110,12 +109,16 @@ task gcloud_assert_write_permission {
         curl "${api_call}" --header "Authorization: Bearer $bearer" --header "Accept: application/json" --compressed > response.json
 
         # Print the response
+        echo "Bucket: ${bucket}"
+        echo "API call: ${api_call}"
+        echo "Response:"
         cat response.json
+        echo "========= end of response"
 
         # Parse the response in python
-        python_json_parsing="import sys, json; print(str(json.load(sys.stdin).get('permissions', ['none'])[0] == 'storage.objects.create').lower())"
+        python_json_parsing="import sys, json; print(str('storage.objects.create' in json.load(sys.stdin).get('permissions', ['none'])).lower())"
         permission=$(cat response.json | python -c "${python_json_parsing}")
-        echo "Permission: ${permission}"
+        echo "Inferred permission after parsing response JSON: ${permission}"
 
         # Exit status 3 if the user lacks write permission, and explain the error
         if [[ $permission == false ]]; then
