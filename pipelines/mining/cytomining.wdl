@@ -49,7 +49,7 @@ task profiling {
   String cellprofiler_analysis_directory = sub(cellprofiler_analysis_directory_gsurl, "/+$", "")
   String output_directory = sub(output_directory_gsurl, "/+$", "")
 
-  command {
+  command <<<
 
     set -e
 
@@ -57,8 +57,31 @@ task profiling {
     monitor_script.sh > monitoring.log &
 
     # assert write permission on output google bucket
-    # this is a weird hack: rsync in "dry-run" mode with -n will fail if permissions do not exist
-    gsutil rsync -n . ~{output_directory}
+    echo "Checking for write permissions on output bucket ====================="
+    gsurl="~{output_directory}"
+    if [[ ${gsurl} != "gs://"* ]]; then
+       echo "Bad gsURL: '${gsurl}' must begin with 'gs://' to be a valid google bucket path."
+       exit 3
+    fi
+    bearer=$(gcloud auth application-default print-access-token)
+    bucket=$(dirname "${gsurl}")
+    bucket_name="${bucket#gs://}"
+    api_call="https://storage.googleapis.com/storage/v1/b/${bucket_name}/iam/testPermissions?permissions=storage.objects.create"
+    curl "${api_call}" --header "Authorization: Bearer $bearer" --header "Accept: application/json" --compressed > response.json
+    echo "Bucket: ${bucket}"
+    echo "API call: ${api_call}"
+    echo "Response:"
+    cat response.json
+    echo "... end of response"
+    python_json_parsing="import sys, json; print(str('storage.objects.create' in json.load(sys.stdin).get('permissions', ['none'])).lower())"
+    permission=$(cat response.json | python -c "${python_json_parsing}")
+    echo "Inferred permission after parsing response JSON: ${permission}"
+    if [[ $permission == false ]]; then
+       echo "The specified gsURL ${gsurl} cannot be written to."
+       echo "You need storage.objects.create permission on the bucket ${bucket}"
+       exit 3
+    fi
+    echo "====================================================================="
 
     # display for log
     echo "Localizing data from ~{cellprofiler_analysis_directory}"
@@ -163,7 +186,7 @@ task profiling {
 
     echo "Done."
 
-  }
+  >>>
 
   output {
     File monitoring_log = "monitoring.log"
