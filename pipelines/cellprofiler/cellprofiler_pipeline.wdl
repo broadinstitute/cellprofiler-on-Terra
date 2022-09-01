@@ -36,12 +36,6 @@ workflow cellprofiler_pipeline {
   String input_directory = sub(input_directory_gsurl, "/+$", "")
   String output_directory = sub(output_directory_gsurl, "/+$", "")
 
-  # Assert write permission for output_directory
-  call util.gcloud_assert_write_permission {
-    input:
-      gsurls=[output_directory],
-  }
-
   # Define the input files, so that we use Cromwell's automatic file localization
   call util.gsutil_ls_to_file as directory {
     input:
