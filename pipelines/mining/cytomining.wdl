@@ -58,6 +58,10 @@ task profiling {
     # run monitoring script
     monitor_script.sh > monitoring.log &
 
+    # assert write permission on output google bucket
+    # this is a weird hack: rsync in "dry-run" mode with -n will fail if permissions do not exist
+    gsutil rsync -n . ~{output_directory}
+
     # display for log
     echo "Localizing data from ~{cellprofiler_analysis_directory}"
     start=`date +%s`
