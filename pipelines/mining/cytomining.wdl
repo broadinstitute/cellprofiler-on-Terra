@@ -78,7 +78,7 @@ task profiling {
     echo "Inferred permission after parsing response JSON: ${permission}"
     if [[ $permission == false ]]; then
        echo "The specified gsURL ${gsurl} cannot be written to."
-       echo "You need storage.objects.create permission on the bucket ${bucket}"
+       echo "You need storage.objects.create permission on the bucket ${bucket_name}"
        exit 3
     fi
     echo "====================================================================="
