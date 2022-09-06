@@ -64,15 +64,15 @@ task profiling {
        exit 3
     fi
     bearer=$(gcloud auth application-default print-access-token)
-    bucket=$(dirname "${gsurl}")
-    bucket_name="${bucket#gs://}"
+    bucket_name=$(echo "${gsurl#gs://}" | sed 's/\/.*//')
     api_call="https://storage.googleapis.com/storage/v1/b/${bucket_name}/iam/testPermissions?permissions=storage.objects.create"
     curl "${api_call}" --header "Authorization: Bearer $bearer" --header "Accept: application/json" --compressed > response.json
-    echo "Bucket: ${bucket}"
+    echo "gsURL: ${gsurl}"
+    echo "Bucket name: ${bucket_name}"
     echo "API call: ${api_call}"
     echo "Response:"
     cat response.json
-    echo "... end of response"
+    echo "\n... end of response"
     python_json_parsing="import sys, json; print(str('storage.objects.create' in json.load(sys.stdin).get('permissions', ['none'])).lower())"
     permission=$(cat response.json | python -c "${python_json_parsing}")
     echo "Inferred permission after parsing response JSON: ${permission}"
