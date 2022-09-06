@@ -35,7 +35,6 @@ workflow cpd_max_projection_distributed {
   String output_directory = sub(output_images_directory_gsurl, "/+$", "")
   String output_load_data_directory = sub(output_load_data_directory_gsurl, "/+$", "")
 
-
   # Create an index to scatter
   call util.scatter_index as idx {
     input:

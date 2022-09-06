@@ -34,7 +34,6 @@ workflow cpd_analysis_pipeline {
   String output_directory = sub(output_directory_gsurl, "/+$", "")
   String illum_directory = sub(illum_directory_gsurl, "/+$", "")
 
-
   # Create an index to scatter
   call util.scatter_index as idx {
     input:

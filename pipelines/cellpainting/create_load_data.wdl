@@ -32,7 +32,6 @@ workflow create_load_data {
   String images_directory = sub(images_directory_gsurl, "/+$", "")
   String destination_directory = sub(destination_directory_gsurl, "/+$", "")
 
-
   # Define the input files, so that we use Cromwell's automatic file localization
   call util.gsutil_ls_to_file as directory {
     input:
