@@ -14,6 +14,19 @@ task profiling {
     # Input files
     String cellprofiler_analysis_directory_gsurl
     String plate_id
+    # Optional: If the CellProfiler analysis results are in an S3 bucket, this workflow can read the files directly from AWS.
+    # To configure this:
+    # 1) Store the AWS access key id and secret access key in Google Cloud Secret Manager. This allows the secret to be used
+    #    by particular people without it being visible to everyone who can see the workspace.
+    #    (https://cloud.google.com/secret-manager/docs/create-secret)
+    # 2) Grant permission 'Secret Manager Secret Accessor' to your personal Terra proxy group.
+    #    (https://support.terra.bio/hc/en-us/articles/360031023592-Pet-service-accounts-and-proxy-groups-)
+    # 3) Pass the secret's "Resource ID" as the value to these workflow parameters.
+    String? secret_manager_resource_id_aws_access_key_id
+    String? secret_manager_resource_id_aws_secret_access_key
+    # Passing AWS credentials via Google Cloud Secret Manager is the recommended approach.
+    # Alternatively, AWS credentials can be passed as a Google Cloud Storage file.
+    File? aws_credentials_file
 
     # Pycytominer aggregation step
     String? aggregation_operation = "mean"
@@ -51,7 +64,29 @@ task profiling {
 
   command <<<
 
-    set -e
+    # Errors should cause the task to fail, not produce an empty output.
+    set -o errexit
+    set -o pipefail
+    set -o nounset
+
+    ~{if defined(secret_manager_resource_id_aws_access_key_id)
+        then "export AWS_ACCESS_KEY_ID=$(gcloud secrets versions access ~{secret_manager_resource_id_aws_access_key_id})"
+        else ""
+        }
+
+    ~{if defined(secret_manager_resource_id_aws_secret_access_key)
+        then "export AWS_SECRET_ACCESS_KEY=$(gcloud secrets versions access ~{secret_manager_resource_id_aws_secret_access_key})"
+        else ""
+        }
+
+    ~{if defined(aws_credentials_file)
+        then "mkdir -p ~/.aws; cp ~{aws_credentials_file} ~/.aws/credentials"
+        else ""
+        }
+
+    # Send a trace of all fully resolved executed commands to stderr.
+    # Note that we enable this _after_ fetching credentials, because we do not want to log those values.
+    set -o xtrace
 
     # run monitoring script
     monitor_script.sh > monitoring.log &
@@ -203,6 +238,20 @@ task profiling {
     preemptible: hardware_preemptible_tries
   }
 
+  parameter_meta {
+    secret_manager_resource_id_aws_access_key_id: {
+        help: '[optional] If the CellProfiler analysis results are in an S3 bucket, this workflow can read the files directly from AWS. To configure this 1) store the AWS access key id in Google Cloud Secret Manager, which allows the secret to be used by particular people without it being visible to everyone who can see the workspace (https://cloud.google.com/secret-manager/docs/create-secret), 2) grant permission "Secret Manager Secret Accessor" to your personal Terra proxy group (https://support.terra.bio/hc/en-us/articles/360031023592-Pet-service-accounts-and-proxy-groups-) and 3) pass the secret\'s "Resource ID" as the value to this workflow parameter.',
+        suggestions: [ 'projects/123456789012/secrets/my_AWS_Access_Key_ID/versions/1' ]
+    }
+    secret_manager_resource_id_aws_secret_access_key: {
+        help: '[optional] If the CellProfiler analysis results are in an S3 bucket, this workflow can read the files directly from AWS. To configure this 1) store the AWS secret access key in Google Cloud Secret Manager, which allows the secret to be used by particular people without it being visible to everyone who can see the workspace (https://cloud.google.com/secret-manager/docs/create-secret), 2) grant permission "Secret Manager Secret Accessor" to your personal Terra proxy group (https://support.terra.bio/hc/en-us/articles/360031023592-Pet-service-accounts-and-proxy-groups-) and 3) pass the secret\'s "Resource ID" as the value to this workflow parameter.',
+        suggestions: [ 'projects/123456789012/secrets/my_AWS_Secret_Access_Key/versions/1' ]
+    }
+    aws_credentials_file: {
+        help: '[optional] If the CellProfiler analysis results are in an S3 bucket, this workflow can read the files directly from AWS. Passing AWS credentials via Google Cloud Secret Manager is the recommended approach. Alternatively, AWS credentials can be passed as a Google Cloud Storage file using this parameter. The credentials file should be in a bucket shared with only people who should have access to the credentials. The bucket can be a different bucket than the workspace bucket of the Terra workspace where the workflow is running.',
+        suggestions: ['gs://fc-2fe428b0-cff3-4f42-ae2c-721ee7c0ef42/aws_credentials']
+    }
+  }
 }
 
 
