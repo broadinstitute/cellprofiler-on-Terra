@@ -156,16 +156,9 @@ task scatter_index {
     File load_data_csv
     String splitby_metadata
 
-    # Docker image
-    String docker_image = "us.gcr.io/broad-dsde-methods/python_cellprofiler_on_terra:0.0.3"
-
-    # Hardware-related inputs
-    Int hardware_disk_size_GB = 50
-    Int hardware_memory_GB = 15
-    Int hardware_cpu_count = 4
-
-    String output_filename = "unique_ids.txt"
   }
+
+  String output_filename = "unique_ids.txt"
 
   command {
 
@@ -182,10 +175,10 @@ task scatter_index {
   }
 
   runtime {
-    docker: "${docker_image}"
-    disks: "local-disk ${hardware_disk_size_GB} HDD"
-    memory: "${hardware_memory_GB}G"
-    cpu: hardware_cpu_count
+    docker: "us.gcr.io/broad-dsde-methods/python_cellprofiler_on_terra:0.0.3"
+    disks: "local-disk 50 HDD"
+    memory: "15G"
+    cpu: 4
     maxRetries: 2
     preemptible: 2
   }
