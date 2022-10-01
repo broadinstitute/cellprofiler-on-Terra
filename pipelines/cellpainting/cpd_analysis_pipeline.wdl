@@ -49,7 +49,6 @@ workflow cpd_analysis_pipeline {
         illum_directory = illum_directory,
         load_data_csv = load_data_csv,
         splitby_metadata = splitby_metadata,
-        tiny_csv = "load_data_with_illum.csv",
         index = index,
     }
 
