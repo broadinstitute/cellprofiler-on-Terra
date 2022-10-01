@@ -49,7 +49,6 @@ workflow cpd_max_projection_distributed {
         illum_directory = "/illum",  # default
         load_data_csv = load_data,
         splitby_metadata = splitby_metadata,
-        tiny_csv = "load_data.csv",
         index = index,
     }
 

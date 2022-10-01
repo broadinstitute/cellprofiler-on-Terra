@@ -198,10 +198,10 @@ task splitto_scatter {
     File load_data_csv
     String splitby_metadata
     String index
-
-    String tiny_csv = "load_data.csv"
-    String filename_text = "filename_array.text"
   }
+
+  String tiny_csv = "load_data.csv"
+  String filename_text = "filename_array.text"
 
   command {
     pip install pandas ipython numpy click
