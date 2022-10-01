@@ -14,7 +14,6 @@ workflow cpd_analysis_pipeline {
 
     # Specify input file information
     String images_directory_gsurl
-    String? file_extension = ".tiff"
     File load_data_csv
     String illum_directory_gsurl = "${images_directory}/illum"
 
