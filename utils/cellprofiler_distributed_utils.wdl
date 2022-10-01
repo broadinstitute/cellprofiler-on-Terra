@@ -14,14 +14,6 @@ task gsutil_ls {
     # Input directory gsURL
     String directory_gsurl
     String? file_extension = ""  # example ".tiff"
-
-    # Docker image with gsutil
-    String docker_image = "us.gcr.io/broad-dsde-methods/google-cloud-sdk:alpine"
-
-    # Hardware-related inputs
-    Int hardware_disk_size_GB = 50
-    Int hardware_memory_GB = 15
-    Int hardware_cpu_count = 4
   }
 
   command {
@@ -35,10 +27,10 @@ task gsutil_ls {
   }
 
   runtime {
-    docker: "${docker_image}"
-    disks: "local-disk ${hardware_disk_size_GB} HDD"
-    memory: "${hardware_memory_GB}G"
-    cpu: hardware_cpu_count
+    docker: "us.gcr.io/broad-dsde-methods/google-cloud-sdk:alpine"
+    disks: "local-disk 50 HDD"
+    memory: "15G"
+    cpu: 4
     maxRetries: 2
     preemptible: 2
   }
@@ -52,13 +44,6 @@ task gsutil_ls_to_file{
     String directory_gsurl
     String? file_extension = ""  # example ".tiff"
 
-    # Docker image with gsutil
-    String? docker_image = "us.gcr.io/broad-dsde-methods/google-cloud-sdk:alpine"
-
-    # Hardware-related inputs
-    Int hardware_disk_size_GB = 50
-    Int hardware_memory_GB = 15
-    Int hardware_cpu_count = 4
   }
 
   command {
@@ -73,10 +58,10 @@ task gsutil_ls_to_file{
   }
 
   runtime {
-    docker: "${docker_image}"
-    disks: "local-disk ${hardware_disk_size_GB} HDD"
-    memory: "${hardware_memory_GB}G"
-    cpu: hardware_cpu_count
+    docker: "us.gcr.io/broad-dsde-methods/google-cloud-sdk:alpine" # Docker image with gsutil
+    disks: "local-disk 50 HDD"
+    memory: "15G"
+    cpu: 4
     maxRetries: 2
     preemptible: 2
   }
@@ -89,19 +74,11 @@ task gsutil_delocalize {
     # Input and output files
     File file
     String destination_gsurl
-
-    # Construct full file path
-    String filename = basename(file)
-    String full_destination_path = "${destination_gsurl}/${filename}"
-
-    # Docker image
-    String docker_image = "us.gcr.io/broad-dsde-methods/google-cloud-sdk:alpine"
-
-    # Hardware-related inputs
-    Int hardware_disk_size_GB = 500
-    Int hardware_memory_GB = 15
-    Int hardware_cpu_count = 4
   }
+
+  # Construct full file path
+  String filename = basename(file)
+  String full_destination_path = "${destination_gsurl}/${filename}"
 
   command {
     # Copy the file to the specified output location
@@ -109,10 +86,10 @@ task gsutil_delocalize {
   }
 
   runtime {
-    docker: "${docker_image}"
-    disks: "local-disk ${hardware_disk_size_GB} HDD"
-    memory: "${hardware_memory_GB}G"
-    cpu: hardware_cpu_count
+    docker: "us.gcr.io/broad-dsde-methods/google-cloud-sdk:alpine"
+    disks: "local-disk 500 HDD"
+    memory: "15G"
+    cpu: 4
     maxRetries: 2
     preemptible: 2
   }
