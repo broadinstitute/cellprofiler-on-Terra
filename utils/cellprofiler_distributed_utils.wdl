@@ -206,14 +206,6 @@ task splitto_scatter {
     String splitby_metadata
     String index
 
-    # Docker image
-    String docker_image = "us.gcr.io/broad-dsde-methods/python_cellprofiler_on_terra:0.0.3"
-
-    # Hardware-related inputs
-    Int hardware_disk_size_GB = 50
-    Int hardware_memory_GB = 15
-    Int hardware_cpu_count = 4
-
     String tiny_csv = "load_data.csv"
     String filename_text = "filename_array.text"
   }
@@ -239,10 +231,10 @@ task splitto_scatter {
   }
 
   runtime {
-    docker: "${docker_image}"
-    disks: "local-disk ${hardware_disk_size_GB} HDD"
-    memory: "${hardware_memory_GB}G"
-    cpu: hardware_cpu_count
+    docker: "us.gcr.io/broad-dsde-methods/python_cellprofiler_on_terra:0.0.3"
+    disks: "local-disk 50 HDD"
+    memory: "15G"
+    cpu: 4
     maxRetries: 2
     preemptible: 2
   }
@@ -258,17 +250,10 @@ task filter_csv {
     File? full_load_data_csv
     File? full_load_data_with_illum_csv
 
-    # Docker image
-    String docker_image = "us.gcr.io/broad-dsde-methods/python_cellprofiler_on_terra:0.0.3"
-
-    # Hardware-related inputs
-    Int hardware_disk_size_GB = 50
-    Int hardware_memory_GB = 15
-    Int hardware_cpu_count = 4
-
-    String output_filename = "load_data.csv"
-    String output_illum_filename = "load_data_with_illum.csv"
   }
+
+  String output_filename = "load_data.csv"
+  String output_illum_filename = "load_data_with_illum.csv"
 
   command <<<
 
@@ -297,10 +282,10 @@ task filter_csv {
   }
 
   runtime {
-    docker: "${docker_image}"
-    disks: "local-disk ${hardware_disk_size_GB} HDD"
-    memory: "${hardware_memory_GB}G"
-    cpu: hardware_cpu_count
+    docker: "us.gcr.io/broad-dsde-methods/python_cellprofiler_on_terra:0.0.3"
+    disks: "local-disk 50 HDD"
+    memory: "15G"
+    cpu: 4
     maxRetries: 2
     preemptible: 2
   }
@@ -316,14 +301,6 @@ task extract_and_gsutil_rsync {
     # Input and output files
     File tarball
     String destination_gsurl
-
-    # Docker image
-    String docker_image = "us.gcr.io/broad-dsde-methods/google-cloud-sdk:alpine"
-
-    # Hardware-related inputs
-    Int hardware_disk_size_GB = 500
-    Int hardware_memory_GB = 15
-    Int hardware_cpu_count = 4
   }
 
   command {
@@ -350,10 +327,10 @@ task extract_and_gsutil_rsync {
   }
 
   runtime {
-    docker: "${docker_image}"
-    disks: "local-disk ${hardware_disk_size_GB} HDD"
-    memory: "${hardware_memory_GB}G"
-    cpu: hardware_cpu_count
+    docker: "us.gcr.io/broad-dsde-methods/google-cloud-sdk:alpine"
+    disks: "local-disk 50 HDD"
+    memory: "15G"
+    cpu: 4
     maxRetries: 2
     preemptible: 2
   }
@@ -376,19 +353,13 @@ task cellprofiler_pipeline_task {
     String? cellprofiler_docker_image = "cellprofiler/cellprofiler:4.2.1"
 
     # Hardware-related inputs
-    Int hardware_boot_disk_size_GB = 20
-    Int hardware_disk_size_GB = 500
-    Int hardware_memory_GB = 16
-    Int hardware_cpu_count = 4
     Int hardware_preemptible_tries = 2
-
-    String tarball_name = "outputs.tar.gz"
-
-    # NOTE: load_data.csv must specify that all the images are in /cromwell_root/data and /cromwell_root/illum
-    String input_image_dir = "/cromwell_root/data"
-    String illum_image_dir = "/cromwell_root/illum"
-
   }
+
+  # NOTE: load_data.csv must specify that all the images are in /cromwell_root/data and /cromwell_root/illum
+  String input_image_dir = "/cromwell_root/data"
+  String illum_image_dir = "/cromwell_root/illum"
+  String tarball_name = "outputs.tar.gz"
 
   command <<<
 
@@ -463,10 +434,10 @@ task cellprofiler_pipeline_task {
 
   runtime {
     docker: "${cellprofiler_docker_image}"
-    bootDiskSizeGb: hardware_boot_disk_size_GB
-    disks: "local-disk ${hardware_disk_size_GB} HDD"
-    memory: "${hardware_memory_GB}G"
-    cpu: hardware_cpu_count
+    bootDiskSizeGb: 20
+    disks: "local-disk 500 HDD"
+    memory: "15G"
+    cpu: 4
     preemptible: hardware_preemptible_tries
   }
 

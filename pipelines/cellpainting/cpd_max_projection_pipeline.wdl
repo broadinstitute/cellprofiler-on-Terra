@@ -14,7 +14,6 @@ workflow cpd_max_projection_distributed {
 
     # Specify input file information, images directory & extension
     String images_directory_gsurl
-    String? file_extension = ".tiff"
     File load_data
     File load_data_with_illum
 
