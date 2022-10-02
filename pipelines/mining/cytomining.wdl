@@ -29,25 +29,19 @@ task profiling {
     # Desired location of the outputs
     String output_directory_gsurl
 
-    # Output filenames:
-    String agg_filename = plate_id + "_aggregated_" + aggregation_operation + ".csv"
-    String aug_filename = plate_id + "_annotated_" + aggregation_operation + ".csv"
-    String norm_filename = plate_id + "_normalized_" + aggregation_operation + ".csv"
-
-    # Docker image
-    String docker_image = "us.gcr.io/broad-dsde-methods/cytomining:0.0.4"
-
     # Hardware-related inputs
-    Int? hardware_disk_size_GB = 500
     Int? hardware_memory_GB = 30
-    Int? hardware_cpu_count = 4
-    Int? hardware_boot_disk_size_GB = 10
     Int? hardware_preemptible_tries = 2
   }
 
   # Ensure no trailing slashes
   String cellprofiler_analysis_directory = sub(cellprofiler_analysis_directory_gsurl, "/+$", "")
   String output_directory = sub(output_directory_gsurl, "/+$", "")
+
+  # Output filenames:
+  String agg_filename = plate_id + "_aggregated_" + aggregation_operation + ".csv"
+  String aug_filename = plate_id + "_annotated_" + aggregation_operation + ".csv"
+  String norm_filename = plate_id + "_normalized_" + aggregation_operation + ".csv"
 
   command <<<
 
@@ -194,11 +188,11 @@ task profiling {
   }
 
   runtime {
-    docker: "${docker_image}"
-    disks: "local-disk ${hardware_disk_size_GB} HDD"
+    docker: "us.gcr.io/broad-dsde-methods/cytomining:0.0.4"
+    disks: "local-disk 500 HDD"
     memory: "${hardware_memory_GB}G"
-    bootDiskSizeGb: hardware_boot_disk_size_GB
-    cpu: hardware_cpu_count
+    bootDiskSizeGb: 10
+    cpu: 4
     maxRetries: 2
     preemptible: hardware_preemptible_tries
   }
