@@ -84,10 +84,6 @@ task profiling {
         else ""
         }
 
-    # Send a trace of all fully resolved executed commands to stderr.
-    # Note that we enable this _after_ fetching credentials, because we do not want to log those values.
-    set -o xtrace
-
     # run monitoring script
     monitor_script.sh > monitoring.log &
 
@@ -117,6 +113,10 @@ task profiling {
        exit 3
     fi
     echo "====================================================================="
+
+    # Send a trace of all fully resolved executed commands to stderr.
+    # Note that we enable this _after_ running commands involving credentials, because we do not want to log those values.
+    set -o xtrace
 
     # display for log
     echo "Localizing data from ~{cellprofiler_analysis_directory}"
