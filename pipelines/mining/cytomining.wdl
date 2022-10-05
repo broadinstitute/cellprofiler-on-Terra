@@ -36,6 +36,7 @@ task profiling {
 
     # Hardware-related inputs
     Int? hardware_memory_GB = 30
+    Int? hardware_max_retries = 0
     Int? hardware_preemptible_tries = 0
   }
 
@@ -322,7 +323,7 @@ EOF
     memory: "${hardware_memory_GB}G"
     bootDiskSizeGb: 10
     cpu: 4
-    maxRetries: 2
+    maxRetries: hardware_max_retries
     preemptible: hardware_preemptible_tries
   }
 
