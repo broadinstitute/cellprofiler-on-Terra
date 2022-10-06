@@ -257,36 +257,36 @@ EOF
     echo "Running pycytominer aggregation step"
     python <<CODE
 
-    import time
-    import pandas as pd
-    from pycytominer.cyto_utils.cells import SingleCells
-    from pycytominer.cyto_utils import infer_cp_features
-    from pycytominer import normalize, annotate
+import time
+import pandas as pd
+from pycytominer.cyto_utils.cells import SingleCells
+from pycytominer.cyto_utils import infer_cp_features
+from pycytominer import normalize, annotate
 
-    print("Creating Single Cell class... ")
-    start = time.time()
-    sc = SingleCells('sqlite:///~{plate_id}.sqlite',aggregation_operation='~{aggregation_operation}')
-    print("Time: " + str(time.time() - start))
+print("Creating Single Cell class... ")
+start = time.time()
+sc = SingleCells('sqlite:///~{plate_id}.sqlite',aggregation_operation='~{aggregation_operation}')
+print("Time: " + str(time.time() - start))
 
-    print("Aggregating profiles... ")
-    start = time.time()
-    aggregated_df = sc.aggregate_profiles()
-    aggregated_df.to_csv('~{agg_filename}', index=False)
-    print("Time: " + str(time.time() - start))
+print("Aggregating profiles... ")
+start = time.time()
+aggregated_df = sc.aggregate_profiles()
+aggregated_df.to_csv('~{agg_filename}', index=False)
+print("Time: " + str(time.time() - start))
 
-    print("Annotating with metadata... ")
-    start = time.time()
-    plate_map_df = pd.read_csv('~{plate_map_file}', sep="\t")
-    annotated_df = annotate(aggregated_df, plate_map_df, join_on = ~{annotate_join_on})
-    annotated_df.to_csv('~{aug_filename}',index=False)
-    print("Time: " + str(time.time() - start))
+print("Annotating with metadata... ")
+start = time.time()
+plate_map_df = pd.read_csv('~{plate_map_file}', sep="\t")
+annotated_df = annotate(aggregated_df, plate_map_df, join_on = ~{annotate_join_on})
+annotated_df.to_csv('~{aug_filename}',index=False)
+print("Time: " + str(time.time() - start))
 
-    print("Normalizing to plate.. ")
-    start = time.time()
-    normalize(annotated_df, method='~{normalize_method}', mad_robustize_epsilon = ~{mad_robustize_epsilon}).to_csv('~{norm_filename}',index=False)
-    print("Time: " + str(time.time() - start))
+print("Normalizing to plate.. ")
+start = time.time()
+normalize(annotated_df, method='~{normalize_method}', mad_robustize_epsilon = ~{mad_robustize_epsilon}).to_csv('~{norm_filename}',index=False)
+print("Time: " + str(time.time() - start))
 
-    CODE
+CODE
 
     # display for log
     echo " "
