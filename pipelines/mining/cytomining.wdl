@@ -35,6 +35,7 @@ task profiling {
     String? terra_aws_arn
 
     # Hardware-related inputs
+    Int? hardware_num_cpus = 4
     Int? hardware_memory_GB = 30
     Int? hardware_max_retries = 0
     Int? hardware_preemptible_tries = 0
@@ -112,78 +113,77 @@ task profiling {
             # Install the federated AWS credential.
             mkdir -p ~/.aws
             cat << 'EOF' >  ~/.aws/credentials
-[default]
-credential_process = "/opt/get_creds.py" "~{terra_aws_arn}"
+    [default]
+    credential_process = "/opt/get_creds.py" "~{terra_aws_arn}"
 
-EOF
+    EOF
 
             # Install the credential-fetching script.
             mkdir -p /opt
             cat << 'EOF' >  /opt/get_creds.py
-#!/usr/bin/env python3
- 
-import argparse
-import boto3
-import getpass
-import json
-import requests
- 
-META_BASE_URL = 'http://metadata.google.internal/computeMetadata/v1'
-META_HEADERS = {'Metadata-Flavor':  'Google'}
- 
-def query_metadata(path):
-    response = requests.get(f'{META_BASE_URL}{path}', headers=META_HEADERS)
-    
-    if response.ok:
-        return response.text
-    
-    raise SystemExit(f"Retrieving instance metadata `{path}' failed.")
-    
-def main():
-    
-    parser = argparse.ArgumentParser(description=
-        'Obtain temporary credentials for an AWS Role from GCP VM Service Account')
-    
-    parser.add_argument('role_arn', help= 'AWS ARN corresponding to the role to be assumed.')
-    
-    parser.add_argument('--duration', type=int, default=3600, help=
-        'Duration in seconds, may be up to configured limit (min=900, default=3600)' )
-    
-    args=parser.parse_args()
-    
-    project_name = query_metadata('/project/project-id')
-    vm_name = query_metadata('/instance/name')
-    user_name = getpass.getuser()
-    session_name = f'{project_name},{user_name}'
-    
-    token = query_metadata('/instance/service-accounts/default/identity?audience=gcp&format=standard')
-    
-    sts = boto3.client('sts', aws_access_key_id='', aws_secret_access_key='')
-    
-    try:
-        response = sts.assume_role_with_web_identity(RoleArn=args.role_arn, WebIdentityToken=token, 
-                                                     RoleSessionName=session_name,
-                                                     DurationSeconds=args.duration)
-    except Exception as e:
-        raise SystemExit(e)
-        
-    
-    cred_map = response['Credentials']
-    
-    cred = {
-        'Version': 1,
-        'AccessKeyId': cred_map['AccessKeyId'],
-        'SecretAccessKey': cred_map['SecretAccessKey'],
-        'SessionToken': cred_map['SessionToken'],
-        'Expiration': cred_map['Expiration'].isoformat()
-    }
-    
-    print(json.dumps(cred))
-    
-if __name__ == '__main__':
-    main()
+    #!/usr/bin/env python3
 
-EOF
+    import argparse
+    import boto3
+    import getpass
+    import json
+    import requests
+
+    META_BASE_URL = 'http://metadata.google.internal/computeMetadata/v1'
+    META_HEADERS = {'Metadata-Flavor':  'Google'}
+
+    def query_metadata(path):
+        response = requests.get(f'{META_BASE_URL}{path}', headers=META_HEADERS)
+
+        if response.ok:
+            return response.text
+
+        raise SystemExit(f"Retrieving instance metadata `{path}' failed.")
+
+    def main():
+
+        parser = argparse.ArgumentParser(description=
+            'Obtain temporary credentials for an AWS Role from GCP VM Service Account')
+
+        parser.add_argument('role_arn', help= 'AWS ARN corresponding to the role to be assumed.')
+
+        parser.add_argument('--duration', type=int, default=3600, help=
+            'Duration in seconds, may be up to configured limit (min=900, default=3600)' )
+
+        args=parser.parse_args()
+
+        project_name = query_metadata('/project/project-id')
+        vm_name = query_metadata('/instance/name')
+        user_name = getpass.getuser()
+        session_name = f'{project_name},{user_name}'
+
+        token = query_metadata('/instance/service-accounts/default/identity?audience=gcp&format=standard')
+
+        sts = boto3.client('sts', aws_access_key_id='', aws_secret_access_key='')
+
+        try:
+            response = sts.assume_role_with_web_identity(RoleArn=args.role_arn, WebIdentityToken=token, 
+                                                         RoleSessionName=session_name,
+                                                         DurationSeconds=args.duration)
+        except Exception as e:
+            raise SystemExit(e)
+
+        cred_map = response['Credentials']
+
+        cred = {
+            'Version': 1,
+            'AccessKeyId': cred_map['AccessKeyId'],
+            'SecretAccessKey': cred_map['SecretAccessKey'],
+            'SessionToken': cred_map['SessionToken'],
+            'Expiration': cred_map['Expiration'].isoformat()
+        }
+
+        print(json.dumps(cred))
+
+    if __name__ == '__main__':
+        main()
+
+    EOF
 
             chmod a+x /opt/get_creds.py    
         fi
@@ -257,36 +257,36 @@ EOF
     echo "Running pycytominer aggregation step"
     python <<CODE
 
-import time
-import pandas as pd
-from pycytominer.cyto_utils.cells import SingleCells
-from pycytominer.cyto_utils import infer_cp_features
-from pycytominer import normalize, annotate
+    import time
+    import pandas as pd
+    from pycytominer.cyto_utils.cells import SingleCells
+    from pycytominer.cyto_utils import infer_cp_features
+    from pycytominer import normalize, annotate
 
-print("Creating Single Cell class... ")
-start = time.time()
-sc = SingleCells('sqlite:///~{plate_id}.sqlite',aggregation_operation='~{aggregation_operation}')
-print("Time: " + str(time.time() - start))
+    print("Creating Single Cell class... ")
+    start = time.time()
+    sc = SingleCells('sqlite:///~{plate_id}.sqlite',aggregation_operation='~{aggregation_operation}')
+    print("Time: " + str(time.time() - start))
 
-print("Aggregating profiles... ")
-start = time.time()
-aggregated_df = sc.aggregate_profiles()
-aggregated_df.to_csv('~{agg_filename}', index=False)
-print("Time: " + str(time.time() - start))
+    print("Aggregating profiles... ")
+    start = time.time()
+    aggregated_df = sc.aggregate_profiles()
+    aggregated_df.to_csv('~{agg_filename}', index=False)
+    print("Time: " + str(time.time() - start))
 
-print("Annotating with metadata... ")
-start = time.time()
-plate_map_df = pd.read_csv('~{plate_map_file}', sep="\t")
-annotated_df = annotate(aggregated_df, plate_map_df, join_on = ~{annotate_join_on})
-annotated_df.to_csv('~{aug_filename}',index=False)
-print("Time: " + str(time.time() - start))
+    print("Annotating with metadata... ")
+    start = time.time()
+    plate_map_df = pd.read_csv('~{plate_map_file}', sep="\t")
+    annotated_df = annotate(aggregated_df, plate_map_df, join_on = ~{annotate_join_on})
+    annotated_df.to_csv('~{aug_filename}',index=False)
+    print("Time: " + str(time.time() - start))
 
-print("Normalizing to plate.. ")
-start = time.time()
-normalize(annotated_df, method='~{normalize_method}', mad_robustize_epsilon = ~{mad_robustize_epsilon}).to_csv('~{norm_filename}',index=False)
-print("Time: " + str(time.time() - start))
+    print("Normalizing to plate.. ")
+    start = time.time()
+    normalize(annotated_df, method='~{normalize_method}', mad_robustize_epsilon = ~{mad_robustize_epsilon}).to_csv('~{norm_filename}',index=False)
+    print("Time: " + str(time.time() - start))
 
-CODE
+    CODE
 
     # display for log
     echo " "
@@ -322,7 +322,7 @@ CODE
     disks: "local-disk 500 HDD"
     memory: "${hardware_memory_GB}G"
     bootDiskSizeGb: 10
-    cpu: 4
+    cpu: hardware_num_cpus
     maxRetries: hardware_max_retries
     preemptible: hardware_preemptible_tries
   }
