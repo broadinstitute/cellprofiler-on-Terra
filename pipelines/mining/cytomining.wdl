@@ -35,7 +35,7 @@ task profiling {
     String? terra_aws_arn
 
     # Hardware-related inputs
-    Int? hardware_num_cpus = 4
+    Int? hardware_num_cpus = 2
     Int? hardware_memory_GB = 30
     Int? hardware_max_retries = 0
     Int? hardware_preemptible_tries = 0
@@ -89,6 +89,17 @@ task profiling {
     fi
 
     echo "====================================================================="
+
+    echo "Check that the platemap is a TSV ====================="
+    python <<CODE
+    import pandas as pd
+
+    plate_map_df = pd.read_csv('~{plate_map_file}', sep="\t")
+    print(f"Platemap dimensions {plate_map_df.shape} with columns {plate_map_df.columns}")
+    if plate_map_df.shape[1] == 1:
+        raise ValueError(f"Platemap has only one column. Check the file format and ensure that it is tab-separated.")
+    CODE
+
 
     # Send a trace of all fully resolved executed commands to stderr.
     # Note that we enable this _after_ running commands involving credentials, because we do not want to log those values.
