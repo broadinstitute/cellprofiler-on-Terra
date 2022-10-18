@@ -39,6 +39,8 @@ task profiling {
     Int? hardware_memory_GB = 30
     Int? hardware_max_retries = 0
     Int? hardware_preemptible_tries = 0
+    # TODO hardcode image later when its ready
+    String docker
   }
 
   # Ensure no trailing slashes
@@ -112,92 +114,10 @@ task profiling {
           else "echo setting up for AWS access"
         }
     
-        if [ ! -f ~/bin/aws ] ; then
-            # Install the AWS CLI
-            curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
-            unzip -q awscliv2.zip
-            ./aws/install --install-dir $HOME/aws-cli --bin-dir $HOME/bin
-            
-            # Install boto3 which is needed to assume an AWS STS role.
-            pip3 install boto3 requests
-            
-            # Install the federated AWS credential.
-            mkdir -p ~/.aws
-            cat << 'EOF' >  ~/.aws/credentials
-    [default]
-    credential_process = "/opt/get_creds.py" "~{terra_aws_arn}"
-
-    EOF
-
-            # Install the credential-fetching script.
-            mkdir -p /opt
-            cat << 'EOF' >  /opt/get_creds.py
-    #!/usr/bin/env python3
-
-    import argparse
-    import boto3
-    import getpass
-    import json
-    import requests
-
-    META_BASE_URL = 'http://metadata.google.internal/computeMetadata/v1'
-    META_HEADERS = {'Metadata-Flavor':  'Google'}
-
-    def query_metadata(path):
-        response = requests.get(f'{META_BASE_URL}{path}', headers=META_HEADERS)
-
-        if response.ok:
-            return response.text
-
-        raise SystemExit(f"Retrieving instance metadata `{path}' failed.")
-
-    def main():
-
-        parser = argparse.ArgumentParser(description=
-            'Obtain temporary credentials for an AWS Role from GCP VM Service Account')
-
-        parser.add_argument('role_arn', help= 'AWS ARN corresponding to the role to be assumed.')
-
-        parser.add_argument('--duration', type=int, default=3600, help=
-            'Duration in seconds, may be up to configured limit (min=900, default=3600)' )
-
-        args=parser.parse_args()
-
-        project_name = query_metadata('/project/project-id')
-        vm_name = query_metadata('/instance/name')
-        user_name = getpass.getuser()
-        session_name = f'{project_name},{user_name}'
-
-        token = query_metadata('/instance/service-accounts/default/identity?audience=gcp&format=standard')
-
-        sts = boto3.client('sts', aws_access_key_id='', aws_secret_access_key='')
-
-        try:
-            response = sts.assume_role_with_web_identity(RoleArn=args.role_arn, WebIdentityToken=token, 
-                                                         RoleSessionName=session_name,
-                                                         DurationSeconds=args.duration)
-        except Exception as e:
-            raise SystemExit(e)
-
-        cred_map = response['Credentials']
-
-        cred = {
-            'Version': 1,
-            'AccessKeyId': cred_map['AccessKeyId'],
-            'SecretAccessKey': cred_map['SecretAccessKey'],
-            'SessionToken': cred_map['SessionToken'],
-            'Expiration': cred_map['Expiration'].isoformat()
-        }
-
-        print(json.dumps(cred))
-
-    if __name__ == '__main__':
-        main()
-
-    EOF
-
-            chmod a+x /opt/get_creds.py    
-        fi
+        # Install the federated AWS credential.
+        mkdir -p ~/.aws
+        echo '[default]' >  ~/.aws/credentials
+        echo 'credential_process = "/opt/get_aws_credentials.py" "~{terra_aws_arn}"'  >>  ~/.aws/credentials
     }
 
     # display for log
@@ -209,7 +129,7 @@ task profiling {
     mkdir -p /cromwell_root/data
     if [[ ~{cellprofiler_analysis_directory} == "s3://"* ]]; then
         setup_aws_access
-        ~/bin/aws s3 cp --recursive --exclude ".*\.png$" --quiet ~{cellprofiler_analysis_directory} /cromwell_root/data
+        aws s3 cp --recursive --exclude ".*\.png$" --quiet ~{cellprofiler_analysis_directory} /cromwell_root/data
     else
         gsutil -mq rsync -r -x ".*\.png$" ~{cellprofiler_analysis_directory} /cromwell_root/data
     fi
@@ -243,14 +163,14 @@ task profiling {
     echo "cytominer-database ingest /cromwell_root/data sqlite:///~{plate_id}.sqlite -c ingest_config.ini"
 
     # run the very long SQLite database ingestion code
-    cytominer-database ingest /cromwell_root/data sqlite:///~{plate_id}.sqlite -c ingest_config.ini
+    cytominer-database ingest /cromwell_root/data sqlite:///~{plate_id}.sqlite -c ingest_config.ini --no-munge
     sqlite3 ~{plate_id}.sqlite < indices.sql
 
     # Copying sqlite
     echo "Copying sqlite file to ~{output_directory}"
     if [[ ~{output_directory} == "s3://"* ]]; then
         setup_aws_access
-        ~/bin/aws s3 cp --acl bucket-owner-full-control ~{plate_id}.sqlite ~{output_directory}/
+        aws s3 cp --acl bucket-owner-full-control ~{plate_id}.sqlite ~{output_directory}/
     else
         gsutil cp ~{plate_id}.sqlite ~{output_directory}/
     fi
@@ -276,7 +196,10 @@ task profiling {
 
     print("Creating Single Cell class... ")
     start = time.time()
-    sc = SingleCells('sqlite:///~{plate_id}.sqlite',aggregation_operation='~{aggregation_operation}')
+    sc = SingleCells('sqlite:///~{plate_id}.sqlite',
+                     aggregation_operation='~{aggregation_operation}',
+                     add_image_features=True,
+                     image_feature_categories=["Granularity", "Texture", "ImageQuality", "Count", "Threshold"])
     print("Time: " + str(time.time() - start))
 
     print("Aggregating profiles... ")
@@ -308,10 +231,10 @@ task profiling {
     echo "Copying csv outputs to ~{output_directory}"
     if [[ ~{output_directory} == "s3://"* ]]; then
         setup_aws_access
-        ~/bin/aws s3 cp --acl bucket-owner-full-control ~{agg_filename} ~{output_directory}/
-        ~/bin/aws s3 cp --acl bucket-owner-full-control ~{aug_filename} ~{output_directory}/
-        ~/bin/aws s3 cp --acl bucket-owner-full-control ~{norm_filename} ~{output_directory}/
-        ~/bin/aws s3 cp --acl bucket-owner-full-control monitoring.log ~{output_directory}/
+        aws s3 cp --acl bucket-owner-full-control ~{agg_filename} ~{output_directory}/
+        aws s3 cp --acl bucket-owner-full-control ~{aug_filename} ~{output_directory}/
+        aws s3 cp --acl bucket-owner-full-control ~{norm_filename} ~{output_directory}/
+        aws s3 cp --acl bucket-owner-full-control monitoring.log ~{output_directory}/
     else
         gsutil cp ~{agg_filename} ~{output_directory}/
         gsutil cp ~{aug_filename} ~{output_directory}/
@@ -329,7 +252,7 @@ task profiling {
   }
 
   runtime {
-    docker: "us.gcr.io/broad-dsde-methods/cytomining:0.0.4"
+    docker: docker
     disks: "local-disk 500 HDD"
     memory: "${hardware_memory_GB}G"
     bootDiskSizeGb: 10
