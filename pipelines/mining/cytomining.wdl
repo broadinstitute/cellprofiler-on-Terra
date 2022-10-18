@@ -39,7 +39,7 @@ task profiling {
     Int? hardware_memory_GB = 30
     Int? hardware_max_retries = 0
     Int? hardware_preemptible_tries = 0
-    # TODO hardcode image later when its ready
+    # TODO(deflaux) default to Docker image with JUMP/CP profiling recipe later when its published to us.gcr.io/broad-dsde-methods/cytomining
     String docker
   }
 
@@ -48,7 +48,9 @@ task profiling {
   String output_directory = sub(output_directory_url, "/+$", "")
 
   # Output filenames:
-  String agg_filename = plate_id + "_aggregated_" + aggregation_operation + ".csv"
+#  String agg_filename = plate_id + "_aggregated_" + aggregation_operation + ".csv"
+  # The above filename is more informative, but this filename is what is expected for JUMP/CP.
+  String agg_filename = plate_id + ".csv"
   String aug_filename = plate_id + "_annotated_" + aggregation_operation + ".csv"
   String norm_filename = plate_id + "_normalized_" + aggregation_operation + ".csv"
 
@@ -84,7 +86,7 @@ task profiling {
            exit 3
         fi
     elif [[ ${output_url} == "s3://"* ]]; then
-        echo "TODO implement the assertion of write permissions on the output S3 bucket, so that this workflow will fail fast."
+        echo "TODO(deflaux) implement the assertion of write permissions on the output S3 bucket, so that this workflow will fail fast."
     else
         echo "Bad output_url: '${output_url}' must begin with 'gs://' or 's3://' to be a valid bucket path."
         exit 3
@@ -96,6 +98,7 @@ task profiling {
     python <<CODE
     import pandas as pd
 
+    # TODO(deflaux) update this to allow both TSV and CSV.
     plate_map_df = pd.read_csv('~{plate_map_file}', sep="\t")
     print(f"Platemap dimensions {plate_map_df.shape} with columns {plate_map_df.columns}")
     if plate_map_df.shape[1] == 1:
@@ -107,7 +110,6 @@ task profiling {
     # Note that we enable this _after_ running commands involving credentials, because we do not want to log those values.
     set -o xtrace
 
-    # TODO eventually move all of this into the cytomining Docker image.
     function setup_aws_access {
         ~{if ! defined(terra_aws_arn)
           then "echo Unable to authenticate to S3. Workflow parameter 'terra_aws_arn' is required for S3 access. ; exit 3"
@@ -210,6 +212,7 @@ task profiling {
 
     print("Annotating with metadata... ")
     start = time.time()
+    # TODO(deflaux) update this to allow both TSV and CSV.
     plate_map_df = pd.read_csv('~{plate_map_file}', sep="\t")
     annotated_df = annotate(aggregated_df, plate_map_df, join_on = ~{annotate_join_on})
     annotated_df.to_csv('~{aug_filename}',index=False)
