@@ -8,7 +8,6 @@ version 1.0
 
 
 task profiling {
-  # A file that pipelines typically implicitly assume they have access to.
 
   input {
     # Input files
@@ -19,8 +18,10 @@ task profiling {
     String? aggregation_operation = "mean"
 
     # Pycytominer annotation step
-    File plate_map_file
-    String? annotate_join_on = "['Metadata_well_position', 'Metadata_Well']"
+    File plate_map_tsv_file
+    String? plate_map_annotate_join_on = "['Metadata_well_position', 'Metadata_Well']"
+    File external_metadata_tsv_file
+    String? external_metadata_annotate_join_on = "Metadata_broad_sample"
 
     # Pycytominer normalize step
     String? normalize_method = "mad_robustize"
@@ -47,39 +48,60 @@ task profiling {
   String cellprofiler_analysis_directory = sub(cellprofiler_analysis_directory_url, "/+$", "")
   String output_directory = sub(output_directory_url, "/+$", "")
 
-  # Output filenames:
-#  String agg_filename = plate_id + "_aggregated_" + aggregation_operation + ".csv"
-  # The above filename is more informative, but this filename is what is expected for JUMP/CP.
+  # Output filenames
   String agg_filename = plate_id + ".csv"
-  String aug_filename = plate_id + "_annotated_" + aggregation_operation + ".csv"
-  String norm_filename = plate_id + "_normalized_" + aggregation_operation + ".csv"
+  String aug_filename = plate_id + "_augmented.csv"
+  String norm_filename = plate_id + "_normalized.csv"
+  String norm_negcon_filename = plate_id + "_normalized_negcon.csv"
 
   command <<<
 
     set -o errexit
     set -o pipefail
     set -o nounset
-    
-    # run monitoring script
+    set -o xtrace
+
+    # Run the monitoring script.
     monitor_script.sh > monitoring.log &
 
-    # assert write permission on output bucket
-    echo "Checking for write permissions on output bucket ====================="
+    function setup_aws_access {
+        echo "-----[ Setting up AWS credential for federated authorization. ]-----"
+        ~{if ! defined(terra_aws_arn)
+          then "echo Unable to authenticate to S3. Workflow parameter 'terra_aws_arn' is required for S3 access. ; exit 3"
+          else "echo Creating AWS credential file."
+        }
+    
+        # Install the federated AWS credential.
+        mkdir -p ~/.aws
+        echo '[default]' >  ~/.aws/credentials
+        echo 'credential_process = "/opt/get_aws_credentials.py" "~{terra_aws_arn}"'  >>  ~/.aws/credentials
+    }
+
+    echo "-----[ Checking that the metadata files are TSVs. ]-----"
+    python <<CODE
+    import pandas as pd
+    
+    def assert_tsv(file):
+        df = pd.read_csv(file, sep="\t")
+        print(f"{file} dimensions {df.shape} with columns {df.columns}")
+        if df.shape[1] == 1:
+            raise ValueError(f"{file} has only one column. Check the file format and ensure that it is tab-separated.")
+
+    assert_tsv('~{plate_map_tsv_file}')
+    assert_tsv('~{external_metadata_tsv_file}')
+    CODE
+
+    echo "-----[ Checking for write permissions on output bucket. ]-----"
     output_url="~{output_directory}"
     if [[ ${output_url} == "gs://"* ]]; then
-        bearer=$(gcloud auth application-default print-access-token)
         bucket_name=$(echo "${output_url#gs://}" | sed 's/\/.*//')
         api_call="https://storage.googleapis.com/storage/v1/b/${bucket_name}/iam/testPermissions?permissions=storage.objects.create"
-        curl "${api_call}" --header "Authorization: Bearer $bearer" --header "Accept: application/json" --compressed > response.json
-        echo "output_url: ${output_url}"
-        echo "Bucket name: ${bucket_name}"
-        echo "API call: ${api_call}"
-        echo "Response:"
-        cat response.json
-        echo "\n... end of response"
+        set +o xtrace  # Don't log the bearer access token.
+        bearer=$(gcloud auth application-default print-access-token)
+        curl "${api_call}" --no-progress-meter --header "Authorization: Bearer $bearer" --header "Accept: application/json" --compressed > response.json
+        set -o xtrace  # Turn tracing back on.
         python_json_parsing="import sys, json; print(str('storage.objects.create' in json.load(sys.stdin).get('permissions', ['none'])).lower())"
         permission=$(cat response.json | python -c "${python_json_parsing}")
-        echo "Inferred permission after parsing response JSON: ${permission}"
         if [[ $permission == false ]]; then
            echo "The specified output_url ${output_url} cannot be written to."
            echo "You need storage.objects.create permission on the bucket ${bucket_name}"
@@ -92,102 +114,38 @@ task profiling {
         exit 3
     fi
 
-    echo "====================================================================="
-
-    echo "Check that the platemap is a TSV ====================="
-    python <<CODE
-    import pandas as pd
-
-    # TODO(deflaux) update this to allow both TSV and CSV.
-    plate_map_df = pd.read_csv('~{plate_map_file}', sep="\t")
-    print(f"Platemap dimensions {plate_map_df.shape} with columns {plate_map_df.columns}")
-    if plate_map_df.shape[1] == 1:
-        raise ValueError(f"Platemap has only one column. Check the file format and ensure that it is tab-separated.")
-    CODE
-
-
-    # Send a trace of all fully resolved executed commands to stderr.
-    # Note that we enable this _after_ running commands involving credentials, because we do not want to log those values.
-    set -o xtrace
-
-    function setup_aws_access {
-        ~{if ! defined(terra_aws_arn)
-          then "echo Unable to authenticate to S3. Workflow parameter 'terra_aws_arn' is required for S3 access. ; exit 3"
-          else "echo setting up for AWS access"
-        }
-    
-        # Install the federated AWS credential.
-        mkdir -p ~/.aws
-        echo '[default]' >  ~/.aws/credentials
-        echo 'credential_process = "/opt/get_aws_credentials.py" "~{terra_aws_arn}"'  >>  ~/.aws/credentials
-    }
-
-    # display for log
-    echo "Localizing data from ~{cellprofiler_analysis_directory}"
+    echo "-----[ Localizing data from ~{cellprofiler_analysis_directory}. ]-----"
     start=`date +%s`
-    echo $start
-
-    # localize the data
     mkdir -p /cromwell_root/data
     if [[ ~{cellprofiler_analysis_directory} == "s3://"* ]]; then
         setup_aws_access
-        aws s3 cp --recursive --exclude ".*\.png$" --quiet ~{cellprofiler_analysis_directory} /cromwell_root/data
+        aws s3 cp --recursive --quiet --exclude ".*\.png$" ~{cellprofiler_analysis_directory} /cromwell_root/data
     else
         gsutil -mq rsync -r -x ".*\.png$" ~{cellprofiler_analysis_directory} /cromwell_root/data
     fi
     wget -O ingest_config.ini https://raw.githubusercontent.com/broadinstitute/cytominer_scripts/master/ingest_config.ini
     wget -O indices.sql https://raw.githubusercontent.com/broadinstitute/cytominer_scripts/master/indices.sql
-
-    # display for log
     end=`date +%s`
-    echo $end
-    runtime=$((end-start))
-    echo "Total runtime for file localization:"
-    echo $runtime
-
-    # display for log
-    echo " "
-    echo "ls -lh /cromwell_root/data"
+    echo "Total runtime for file localization: $((end-start))."
     ls -lh /cromwell_root/data
-
-    # display for log
-    echo " "
-    echo "ls -lh ."
     ls -lh .
 
-    # display for log
-    echo " "
-    echo "===================================="
-    echo "= Running cytominer-databse ingest ="
-    echo "===================================="
+    echo "-----[ Running cytominer-databse ingest, this takes a long time. ]-----"
     start=`date +%s`
-    echo $start
-    echo "cytominer-database ingest /cromwell_root/data sqlite:///~{plate_id}.sqlite -c ingest_config.ini"
-
-    # run the very long SQLite database ingestion code
     cytominer-database ingest /cromwell_root/data sqlite:///~{plate_id}.sqlite -c ingest_config.ini --no-munge
     sqlite3 ~{plate_id}.sqlite < indices.sql
 
-    # Copying sqlite
-    echo "Copying sqlite file to ~{output_directory}"
+    echo "-----[ Copying sqlite file to ~{output_directory}. ]-----"
     if [[ ~{output_directory} == "s3://"* ]]; then
         setup_aws_access
         aws s3 cp --acl bucket-owner-full-control ~{plate_id}.sqlite ~{output_directory}/
     else
         gsutil cp ~{plate_id}.sqlite ~{output_directory}/
     fi
-    
-    # display for log
     end=`date +%s`
-    echo $end
-    runtime=$((end-start))
-    echo "Total runtime for cytominer-database ingest:"
-    echo $runtime
-    echo "===================================="
+    echo "Total runtime for cytominer-database ingest and copy sqlite to bucket: $((end-start))."
 
-    # run the python code right here for pycytominer aggregation
-    echo " "
-    echo "Running pycytominer aggregation step"
+    echo "-----[ Running pycytominer aggregation step. ]-----"
     python <<CODE
 
     import time
@@ -196,52 +154,73 @@ task profiling {
     from pycytominer.cyto_utils import infer_cp_features
     from pycytominer import normalize, annotate
 
-    print("Creating Single Cell class... ")
+    print("-----[ Creating Single Cell class. ]-----")
     start = time.time()
-    sc = SingleCells('sqlite:///~{plate_id}.sqlite',
-                     aggregation_operation='~{aggregation_operation}',
+    sc = SingleCells("sqlite:///~{plate_id}.sqlite",
+                     aggregation_operation="~{aggregation_operation}",
                      add_image_features=True,
-                     image_feature_categories=["Granularity", "Texture", "ImageQuality", "Count", "Threshold"])
+                     image_feature_categories=["Intensity", "Granularity", "Texture", "ImageQuality", "Count", "Threshold"])
     print("Time: " + str(time.time() - start))
 
-    print("Aggregating profiles... ")
+    print("-----[ Aggregating profiles, this takes a long time. ]----- ")
     start = time.time()
     aggregated_df = sc.aggregate_profiles()
-    aggregated_df.to_csv('~{agg_filename}', index=False)
+    aggregated_df.to_csv("~{agg_filename}", index=False)
     print("Time: " + str(time.time() - start))
 
-    print("Annotating with metadata... ")
+    print("-----[ Annotating with metadata. ]-----")
     start = time.time()
-    # TODO(deflaux) update this to allow both TSV and CSV.
-    plate_map_df = pd.read_csv('~{plate_map_file}', sep="\t")
-    annotated_df = annotate(aggregated_df, plate_map_df, join_on = ~{annotate_join_on})
-    annotated_df.to_csv('~{aug_filename}',index=False)
+    plate_map_df = pd.read_csv("~{plate_map_tsv_file}", sep="\t")
+    external_metadata_df = pd.read_csv("~{external_metadata_tsv_file}", sep="\t")
+    annotated_df = annotate(
+        profiles=aggregated_df,
+        platemap=plate_map_df,
+        join_on = ~{plate_map_annotate_join_on},
+        external_metadata=external_metadata_df,
+        external_join_left="~{external_metadata_annotate_join_on}",
+        external_join_right="~{external_metadata_annotate_join_on}")
+    annotated_df.to_csv("~{aug_filename}", index=False)
     print("Time: " + str(time.time() - start))
 
-    print("Normalizing to plate.. ")
+    print("-----[ Normalizing to plate. ]-----")
     start = time.time()
-    normalize(annotated_df, method='~{normalize_method}', mad_robustize_epsilon = ~{mad_robustize_epsilon}).to_csv('~{norm_filename}',index=False)
+    normalize(
+        profiles=annotated_df,
+        features="infer",
+        image_features=True,
+        samples="all",
+        method="~{normalize_method}",
+        mad_robustize_epsilon = ~{mad_robustize_epsilon}).to_csv("~{norm_filename}", index=False)
     print("Time: " + str(time.time() - start))
 
+    print("-----[ Normalizing to plate for negative controls. ]-----")
+    start = time.time()
+    normalize(
+        profiles=annotated_df,
+        features="infer",
+        image_features=True,
+        samples="Metadata_control_type == 'negcon'",
+        method="~{normalize_method}",
+        mad_robustize_epsilon = ~{mad_robustize_epsilon}).to_csv("~{norm_negcon_filename}", index=False)
+    print("Time: " + str(time.time() - start))
     CODE
 
-    # display for log
-    echo " "
-    echo "Completed pycytominer aggregation annotation & normalization"
-    echo "ls -lh ."
+    echo "Completed pycytominer aggregation annotation & normalization."
     ls -lh .
 
-    echo "Copying csv outputs to ~{output_directory}"
+    echo "-----[ Copying csv outputs to ~{output_directory}. ]----- "
     if [[ ~{output_directory} == "s3://"* ]]; then
         setup_aws_access
         aws s3 cp --acl bucket-owner-full-control ~{agg_filename} ~{output_directory}/
         aws s3 cp --acl bucket-owner-full-control ~{aug_filename} ~{output_directory}/
         aws s3 cp --acl bucket-owner-full-control ~{norm_filename} ~{output_directory}/
+        aws s3 cp --acl bucket-owner-full-control ~{norm_negcon_filename} ~{output_directory}/
         aws s3 cp --acl bucket-owner-full-control monitoring.log ~{output_directory}/
     else
         gsutil cp ~{agg_filename} ~{output_directory}/
         gsutil cp ~{aug_filename} ~{output_directory}/
         gsutil cp ~{norm_filename} ~{output_directory}/
+        gsutil cp ~{norm_negcon_filename} ~{output_directory}/
         gsutil cp monitoring.log ~{output_directory}/
     fi
 
@@ -273,7 +252,8 @@ workflow cytomining {
     String plate_id
 
     # Pycytominer annotation step
-    File plate_map_file
+    File plate_map_tsv_file
+    File external_metadata_tsv_file
 
     # Desired location of the outputs
     String output_directory_url
@@ -283,7 +263,8 @@ workflow cytomining {
     input:
         cellprofiler_analysis_directory_url = cellprofiler_analysis_directory_url,
         plate_id = plate_id,
-        plate_map_file = plate_map_file,
+        plate_map_tsv_file = plate_map_tsv_file,
+        external_metadata_tsv_file = external_metadata_tsv_file,
         output_directory_url = output_directory_url,
   }
 
