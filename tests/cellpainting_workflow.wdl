@@ -55,7 +55,8 @@ workflow cellpainting_workflow {
     #### arguments for cytomining ####
     ####################################
     # Metadata for annotation step
-    File plate_map_file
+    File plate_map_tsv_file
+    File external_metadata_tsv_file
     # Final output with SQlite and .csv aggregated profiles
     String mining_directory_gsurl
 
@@ -101,10 +102,11 @@ workflow cellpainting_workflow {
   # Run cytomining
   call cytomining_workflow.cytomining as cytomining {
     input:
-      cellprofiler_analysis_directory_gsurl = cpd_analysis.analysis_output_directory,
+      cellprofiler_analysis_directory_url = cpd_analysis.analysis_output_directory,
       plate_id = plate_id,
-      plate_map_file = plate_map_file,
-      output_directory_gsurl = mining_directory_gsurl,
+      plate_map_tsv_file = plate_map_tsv_file,
+      external_metadata_tsv_file = external_metadata_tsv_file,
+      output_directory_url = mining_directory_gsurl,
   }
 
 }
