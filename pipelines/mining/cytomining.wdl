@@ -40,8 +40,8 @@ task profiling {
     Int? hardware_memory_GB = 30
     Int? hardware_max_retries = 0
     Int? hardware_preemptible_tries = 0
-    # TODO(deflaux) default to Docker image with JUMP/CP profiling recipe later when its published to us.gcr.io/broad-dsde-methods/cytomining
-    String docker
+    # TODO(deflaux) update default later when its published to us.gcr.io/broad-dsde-methods/cytomining
+    String? docker = "gcr.io/terra-solutions-jump-cp-dev/cytomining_jumpcp_recipe:20221018"
   }
 
   # Ensure no trailing slashes
@@ -156,10 +156,11 @@ task profiling {
 
     print("-----[ Creating Single Cell class. ]-----")
     start = time.time()
-    sc = SingleCells("sqlite:///~{plate_id}.sqlite",
-                     aggregation_operation="~{aggregation_operation}",
-                     add_image_features=True,
-                     image_feature_categories=["Intensity", "Granularity", "Texture", "ImageQuality", "Count", "Threshold"])
+    sc = SingleCells(
+        "sqlite:///~{plate_id}.sqlite",
+        aggregation_operation="~{aggregation_operation}",
+        add_image_features=True,
+        image_feature_categories=["Intensity", "Granularity", "Texture", "ImageQuality", "Count", "Threshold"])
     print("Time: " + str(time.time() - start))
 
     print("-----[ Aggregating profiles, this takes a long time. ]----- ")
