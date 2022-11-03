@@ -10,26 +10,31 @@ version 1.0
 task profiling {
 
   input {
-    # Input files
+    # GCS or S3 folder of Cell profiler analysis result files.
     String cellprofiler_analysis_directory_url
     String plate_id
 
-    # Pycytominer aggregation step
+    # Pycytominer aggregation step parameters.
     String aggregation_operation = "mean"
 
-    # Pycytominer annotation step
+    # Pycytominer annotation step parameters.
+    # Metadata files can be TSV or CSV format. Pandas will guess the delimiter.
     File plate_map_file
     String plate_map_join_col_left = "Metadata_well_position"
     String plate_map_join_col_right = "Metadata_Well"
-    File external_metadata_file
-    String external_metadata_join_col_left
-    String external_metadata_join_col_right
+    File? external_metadata_file
+    String? external_metadata_join_col_left
+    String? external_metadata_join_col_right
 
-    # Pycytominer normalize step
+    # Pycytominer normalize entire plate step parameters.
     String normalize_method = "mad_robustize"
     Float mad_robustize_epsilon = 0.0
 
-    # Desired location of the outputs
+    # Pycytominer normalize over subset of wells step parameters.
+    String normalize_across_subset_column = "Metadata_control_type"
+    String normalize_across_subset_value = "negcon"
+    
+    # Desired GCS or S3 folder location for the outputs.
     String output_directory_url
 
     # Optional: If the CellProfiler analysis results are in an S3 bucket, this workflow can read the files directly from AWS.
@@ -37,22 +42,24 @@ task profiling {
     # To configure this: TODO(deflaux) add instructions
     String? terra_aws_arn
 
-    # Hardware-related inputs
+    # Hardware-related inputs.
     Int hardware_num_cpus = 1
     Int hardware_memory_GB = 30
     Int hardware_max_retries = 0
     Int hardware_preemptible_tries = 0
   }
 
-  # Ensure no trailing slashes
+  # Ensure no trailing slashes.
   String cellprofiler_analysis_directory = sub(cellprofiler_analysis_directory_url, "/+$", "")
   String output_directory = sub(output_directory_url, "/+$", "")
 
-  # Output filenames
+  # Output filenames.
+  String bucket_write_test_filename = "terra_confirm_bucket_writable.txt"
+  String merged_metadata_filename = plate_id + "_merged_metadata.csv"
   String agg_filename = plate_id + ".csv.gz"
   String aug_filename = plate_id + "_augmented.csv.gz"
   String norm_filename = plate_id + "_normalized.csv.gz"
-  String norm_negcon_filename = plate_id + "_normalized_negcon.csv.gz"
+  String norm_subset_filename = plate_id + "_normalized_" + normalize_across_subset_value + ".csv.gz"
 
   command <<<
 
@@ -79,27 +86,52 @@ task profiling {
     }
 
 
-    echo "-----[ Checking the metadata files. ]-----"
+    echo "-----[ Join the metadata files, if applicable, and fail fast for any problems with the metadata. ]-----"
     python <<CODE
     import pandas as pd
     from pycytominer.cyto_utils.load import load_platemap
+    
+    ~{if defined(external_metadata_file) then "external_metadata = '" + external_metadata_file + "'" else "external_metadata = None"}
+    ~{if defined(external_metadata_join_col_left) then "external_join_left = '" + external_metadata_join_col_left + "'" else "external_join_left = None"}
+    ~{if defined(external_metadata_join_col_right) then "external_join_right = '" + external_metadata_join_col_right + "'" else "external_join_right = None"}
+    
+    def add_prefix_if_missing(col):
+        # Note that a 'Metadata_' prefix is added to all metadata at pycytominer load time,
+        # so also add this prefix to column name parameters, if needed.
+        return col if col.startswith('Metadata_') else f'Metadata_{col}'
 
-    def assert_metadata_columns(file, col, msg="Check the value of the 'join_col' parameters for this file."):
-        df = load_platemap(file, add_metadata_id=False)
-        if df.shape[1] < 2:
-            raise ValueError(f"{file} has too few columns. Check the file format and ensure that it is TSV or CSV.")
-        if col not in df.columns:
-            if col.replace("Metadata_", "") not in df.columns: 
-                raise ValueError(f"""{file} has columns {list(df.columns)}.
-                {file} contains neither "{col}" nor its name with suffix "Metadata_" added, if not present.
-                {msg}""")
+    platemap_df = load_platemap("~{plate_map_file}", add_metadata_id=True)
+    if not add_prefix_if_missing("~{plate_map_join_col_left}") in platemap_df.columns:
+        raise ValueError("""Unable to join with CellProfiler data.
+            Metadata contains neither column '~{plate_map_join_col_left}' nor its name with prefix 'Metadata_' added, if not already present.
+            """)
 
-    assert_metadata_columns(file="~{plate_map_file}", col="~{plate_map_join_col_left}")
-    assert_metadata_columns(file="~{plate_map_file}", col="~{external_metadata_join_col_left}")
-    assert_metadata_columns(file="~{external_metadata_file}", col="~{external_metadata_join_col_right}")
-    # Column used for normalizing to plate for negative controls.
-    assert_metadata_columns(file="~{external_metadata_file}", col="control_type",
-        msg="Ensure that column 'control_type' is present in the external metadata file.")    
+    if not external_metadata:
+        metadata_df = platemap_df
+    else:
+        try:
+            external_df = load_platemap(external_metadata, add_metadata_id=True)
+            metadata_df = platemap_df.merge(
+                external_df,
+                left_on=add_prefix_if_missing(external_join_left),
+                right_on=add_prefix_if_missing(external_join_right),
+                how="left",
+            ).reset_index(drop=True).drop_duplicates()
+        except Exception as err:
+            print(f"Unexpected {err}, {type(err)}")
+            print(f"Unable to merge external metadata with platemap. Check the files and the column names to use for joining them.")
+            raise
+
+    subset_column = add_prefix_if_missing("~{normalize_across_subset_column}")
+    if not subset_column in metadata_df.columns:
+        raise ValueError("""Unable to normalize over a subset of the wells.
+            Metadata contains neither column '~{normalize_across_subset_column}' nor its name with prefix 'Metadata_' added, if not already present.
+            """)
+    if not metadata_df[subset_column].str.contains("~{normalize_across_subset_value}").any():
+        raise ValueError("""Unable to normalize over a subset of the wells.
+            Ensure that metadata column '~{normalize_across_subset_column}', contains at least one '~{normalize_across_subset_value}' value.""")
+
+    metadata_df.to_csv("~{merged_metadata_filename}", index=False)
     CODE
 
 
@@ -120,7 +152,9 @@ task profiling {
            exit 3
         fi
     elif [[ ${output_url} == "s3://"* ]]; then
-        echo "TODO(deflaux) implement the assertion of write permissions on the output S3 bucket, so that this workflow will fail fast."
+        setup_aws_access
+        echo "Check that Terra can write files to this S3 folder." > ~{bucket_write_test_filename}
+        aws s3 cp --acl bucket-owner-full-control ~{bucket_write_test_filename} ~{output_directory}/
     else
         echo "Bad output_url: '${output_url}' must begin with 'gs://' or 's3://' to be a valid bucket path."
         exit 3
@@ -175,7 +209,7 @@ task profiling {
     FLOAT_FORMAT = "%.5g"
     COMPRESSION = "gzip"
     
-    def fix_join_col_name(col):
+    def add_prefix_if_missing(col):
         # Note that a 'Metadata_' prefix is added to all metadata at load time, so also
         # add this prefix to the join columns if needed.
         return col if col.startswith('Metadata_') else f'Metadata_{col}'
@@ -197,16 +231,11 @@ task profiling {
 
     print("-----[ Annotating with metadata. ]-----")
     start = time.time()
-    # The annotate() method calls load_platemap() on the platemap file but not the external metadata file.
-    # Call load_platemap explicitly so that external metadata can be in either CSV or TSV format.
-    external_metadata_df = load_platemap("~{external_metadata_file}")
     annotated_df = annotate(
         profiles=aggregated_df,
-        platemap="~{plate_map_file}",
-        join_on = [fix_join_col_name("~{plate_map_join_col_left}"), fix_join_col_name("~{plate_map_join_col_right}")],
-        external_metadata=external_metadata_df,
-        external_join_left=fix_join_col_name("~{external_metadata_join_col_left}"),
-        external_join_right=fix_join_col_name("~{external_metadata_join_col_right}"))
+        platemap="~{merged_metadata_filename}",
+        join_on = [add_prefix_if_missing("~{plate_map_join_col_left}"),
+                   add_prefix_if_missing("~{plate_map_join_col_right}")])
     output(annotated_df, "~{aug_filename}", float_format=FLOAT_FORMAT, compression_options=COMPRESSION)
     print("Time: " + str(time.time() - start))
 
@@ -223,17 +252,17 @@ task profiling {
         "~{norm_filename}", float_format=FLOAT_FORMAT, compression_options=COMPRESSION)
     print("Time: " + str(time.time() - start))
 
-    print("-----[ Normalizing to plate for negative controls. ]-----")
+    print("-----[ Normalizing to plate for a subset of wells. ]-----")
     start = time.time()
     output(
         normalize(
             profiles=annotated_df,
             features="infer",
             image_features=True,
-            samples="Metadata_control_type == 'negcon'",
+            samples=f"{add_prefix_if_missing('~{normalize_across_subset_column}')} == '~{normalize_across_subset_value}'",
             method="~{normalize_method}",
             mad_robustize_epsilon = ~{mad_robustize_epsilon}),
-        "~{norm_negcon_filename}", float_format=FLOAT_FORMAT, compression_options=COMPRESSION)
+        "~{norm_subset_filename}", float_format=FLOAT_FORMAT, compression_options=COMPRESSION)
     print("Time: " + str(time.time() - start))
     CODE
     echo "Completed pycytominer aggregation annotation & normalization."
@@ -246,14 +275,12 @@ task profiling {
         aws s3 cp --acl bucket-owner-full-control ~{agg_filename} ~{output_directory}/
         aws s3 cp --acl bucket-owner-full-control ~{aug_filename} ~{output_directory}/
         aws s3 cp --acl bucket-owner-full-control ~{norm_filename} ~{output_directory}/
-        aws s3 cp --acl bucket-owner-full-control ~{norm_negcon_filename} ~{output_directory}/
-        aws s3 cp --acl bucket-owner-full-control monitoring.log ~{output_directory}/
+        aws s3 cp --acl bucket-owner-full-control ~{norm_subset_filename} ~{output_directory}/
     else
         gsutil cp ~{agg_filename} ~{output_directory}/
         gsutil cp ~{aug_filename} ~{output_directory}/
         gsutil cp ~{norm_filename} ~{output_directory}/
-        gsutil cp ~{norm_negcon_filename} ~{output_directory}/
-        gsutil cp monitoring.log ~{output_directory}/
+        gsutil cp ~{norm_subset_filename} ~{output_directory}/
     fi
 
     echo "Done."
@@ -286,9 +313,9 @@ workflow cytomining {
 
     # Pycytominer annotation step
     File plate_map_file
-    File external_metadata_file
-    String external_metadata_join_col_left
-    String external_metadata_join_col_right
+    File? external_metadata_file
+    String? external_metadata_join_col_left
+    String? external_metadata_join_col_right
 
     # Desired location of the outputs
     String output_directory_url
