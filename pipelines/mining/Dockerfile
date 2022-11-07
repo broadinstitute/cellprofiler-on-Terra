@@ -19,7 +19,7 @@ RUN curl -so $HOME/google-cloud-cli.tar.gz https://dl.google.com/dl/cloudsdk/cha
  && rm $HOME/google-cloud-cli.tar.gz \
  && rm -rf ~/.cache/pip
 
-# Install cytominer-database and a specific commit of pycytominr for the JUMP/CP cytomining recipe.
+# Install cytominer-database and a specific commit of pycytominer for the JUMP/CP cytomining recipe.
 RUN chmod a+rx /software/monitor_script.sh \
  && pip3 install \
      cytominer-database==0.3.4 \
