@@ -16,5 +16,8 @@ workflows:
     primaryDescriptorPath: /pipelines/mining/cytomining.wdl
     name: cytomining
   - subclass: WDL
+    primaryDescriptorPath: /pipelines/mining/cytomining_jumpcp.wdl
+    name: cytomining_jumpcp
+  - subclass: WDL
     primaryDescriptorPath: /pipelines/cellprofiler/cellprofiler_pipeline.wdl
     name: cellprofiler

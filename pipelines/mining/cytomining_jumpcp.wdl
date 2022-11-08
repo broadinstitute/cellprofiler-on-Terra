@@ -1,6 +1,6 @@
 version 1.0
 
-## Copyright Broad Institute, 2021
+## Copyright Broad Institute, Verily Life Sciences, 2022
 ##
 ## LICENSING :
 ## This script is released under the WDL source code license (BSD-3)
