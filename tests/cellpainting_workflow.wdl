@@ -108,15 +108,6 @@ workflow cellpainting_workflow {
       output_directory_gsurl = mining_directory_gsurl,
   }
 
-  # Run cytomining
-  call cytomining_workflow.cytomining as cytomining {
-    input:
-      cellprofiler_analysis_directory_gsurl = cpd_analysis.analysis_output_directory,
-      plate_id = plate_id,
-      plate_map_file = plate_map_file,
-      output_directory_gsurl = mining_directory_gsurl,
-  }
-
   # Run cytomining_jumpcp
   call cytomining_jumpcp_workflow.cytomining as cytomining_jumpcp {
     input:
