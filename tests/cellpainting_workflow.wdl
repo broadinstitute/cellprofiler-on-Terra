@@ -9,6 +9,7 @@ import "../pipelines/cellpainting/cpd_max_projection_pipeline.wdl" as cpd_max_pr
 import "../pipelines/cellpainting/cp_illumination_pipeline.wdl" as cp_illumination_workflow
 import "../pipelines/cellpainting/cpd_analysis_pipeline.wdl" as cpd_analysis_workflow
 import "../pipelines/mining/cytomining.wdl" as cytomining_workflow
+import "../pipelines/mining/cytomining_jumpcp.wdl" as cytomining_jumpcp_workflow
 
 
 workflow cellpainting_workflow {
@@ -105,6 +106,15 @@ workflow cellpainting_workflow {
       plate_id = plate_id,
       plate_map_file = plate_map_file,
       output_directory_gsurl = mining_directory_gsurl,
+  }
+
+  # Run cytomining_jumpcp
+  call cytomining_jumpcp_workflow.cytomining as cytomining_jumpcp {
+    input:
+      cellprofiler_analysis_directory_url = cpd_analysis.analysis_output_directory,
+      plate_id = plate_id,
+      plate_map_file = plate_map_file,
+      output_directory_url = mining_directory_gsurl,
   }
 
 }
