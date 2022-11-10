@@ -201,7 +201,7 @@ task profiling {
     import time
     import pandas as pd
     from pycytominer.cyto_utils.cells import SingleCells
-    from pycytominer.cyto_utils.load import load_platemap
+    from pycytominer.cyto_utils.load import load_profiles
     from pycytominer.cyto_utils import output
     from pycytominer import normalize, annotate
     
@@ -225,14 +225,15 @@ task profiling {
 
     print("-----[ Aggregating profiles, this takes a long time. ]----- ")
     start = time.time()
-    aggregated_df = sc.aggregate_profiles()
-    output(aggregated_df, "~{agg_filename}", float_format=FLOAT_FORMAT, compression_options=COMPRESSION)
+    output(sc.aggregate_profiles(), "~{agg_filename}", float_format=FLOAT_FORMAT, compression_options=COMPRESSION)
     print("Time: " + str(time.time() - start))
 
     print("-----[ Annotating with metadata. ]-----")
     start = time.time()
     annotated_df = annotate(
-        profiles=aggregated_df,
+        # Read in the profiles instead of using the dataframe in memory so that the lower precisions floats
+        # are used in the normalization step. Do this for consistency with other implemenations of this pipeline.
+        profiles=load_profiles("~{agg_filename}"),
         platemap="~{merged_metadata_filename}",
         join_on = [add_prefix_if_missing("~{plate_map_join_col_left}"),
                    add_prefix_if_missing("~{plate_map_join_col_right}")])
