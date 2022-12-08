@@ -11,10 +11,10 @@ Please feel free to give us feedback on its usability via [GitHub issues](https:
 # How do I get started?
 
 1. Clone this workspace.
-    * Need help? See [video tutorial](https://www.youtube.com/watch?v=mYUNQyAJ6WI) and [docs](https://support.terra.bio/hc/en-us/articles/360026130851-Make-your-own-project-workspace).
+    * Need help? See workspace [video tutorial](https://www.youtube.com/watch?v=mYUNQyAJ6WI) and [docs](https://support.terra.bio/hc/en-us/articles/360026130851-Make-your-own-project-workspace).
 2. Run notebook `create_terra_data_tables.ipynb` so that the data tables in your clone are updated to have output result paths in your clone's workspace bucket instead of the source workspace.
 3. Use Data Table "plate" to run the workflows in this order:
-    * **Need help?** See [video tutorial](https://youtu.be/aHqp76vx5V8?t=150) and [docs](https://support.terra.bio/hc/en-us/articles/360034701991-Pipelining-with-workflows).
+    * Need help? See workflow [video tutorial](https://youtu.be/aHqp76vx5V8) and [docs](https://support.terra.bio/hc/en-us/articles/360034701991-Pipelining-with-workflows).
     * `0_create_load_data` with all parameters empty except the following
         * workflow input parameters
             * `create_load_data.config_yaml`: `this.config`
