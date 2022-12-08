@@ -1,21 +1,47 @@
 # CellProfiler workflows on Terra
 
-For this demonstration, we will use the image data, metadata, and [CellProfiler](https://cellprofiler.org/) pipelines from:
+For this demonstration, we will use four plates of image data, metadata, and [CellProfiler](https://cellprofiler.org/) pipelines from:
 
 > [Three million images and morphological profiles of cells treated with matched chemical and genetic perturbations](https://www.biorxiv.org/content/10.1101/2022.01.05.475090v1), Chandrasekaran et al., 2022
 
-All the code can be found in our [GitHub repo](https://github.com/broadinstitute/cellprofiler-on-Terra). 
-
-Please feel free to give us feedback on its usability via GitHub issues or email.
+The workflows are published in [Dockstore](https://dockstore.org/search?organization=broadinstitute&entryType=workflows&search=cellprofiler), the code is in https://github.com/broadinstitute/cellprofiler-on-Terra, and for any feedback or issues please see [GitHub issues](https://github.com/broadinstitute/cellprofiler-on-Terra/issues).
 
 # How do I get started?
 
 1. Clone this workspace.
-    * Need help? See [video tutorial](https://www.youtube.com/watch?v=mYUNQyAJ6WI) and [docs](https://support.terra.bio/hc/en-us/articles/360026130851-Make-your-own-project-workspace).
+    * Need help? See the Terra workspace [video tutorial](https://www.youtube.com/watch?v=mYUNQyAJ6WI) and [docs](https://support.terra.bio/hc/en-us/articles/360026130851-Make-your-own-project-workspace).
 2. Run notebook `create_terra_data_tables.ipynb` so that the data tables in your clone are updated to have output result paths in your clone's workspace bucket instead of the source workspace.
-3. Use Data Table "plate" to run the workflows in this order: `0_create_load_data`, `2_cp_illumination_pipeline`, `3_cpd_analysis_pipeline`, and `4_cytomining`.
-    * Need help? See [video tutorial](https://youtu.be/aHqp76vx5V8?t=150) and [docs](https://support.terra.bio/hc/en-us/articles/360034701991-Pipelining-with-workflows).
-    * *Note:* you may need to uncheck the "use call caching" box if your workflow run completes immediately because the particular plate has been previously analyzed with the workflow.
+3. Use Data Table "plate" to run the workflows in this order:
+    * Need help? See the Terra workflow [video tutorial](https://youtu.be/aHqp76vx5V8) and [docs](https://support.terra.bio/hc/en-us/articles/360034701991-Pipelining-with-workflows).
+    * `0_create_load_data` with all parameters empty except the following
+        * workflow input parameters
+            * `create_load_data.config_yaml`: `this.config`
+            * `create_load_data.destination_directory_gsurl`: `this.create_load_data_result_destination`
+            * `create_load_data.images_directory_gsurl`: `this.images`
+            * `create_load_data.plate_id`: `this.plate_id`
+        * workflow output parameters
+            * `create_load_data.load_data_csv`: `this.load_data_csv`
+            * `create_load_data.load_data_with_illum_csv`: `this.load_data_with_illum_csv`
+    * `2_cp_illumination_pipeline` with all parameters empty except the following
+        * workflow input parameters
+            * `cp_illumination_pipeline.cppipe_file`: `this.illum_cppipe`
+            * `cp_illumination_pipeline.images_directory_gsurl`: `this.images`
+            * `cp_illumination_pipeline.load_data`: `this.load_data_csv`
+            * `cp_illumination_pipeline.output_illum_directory_gsurl`: `this.illumination_correction_result_destination`
+    * `3_cpd_analysis_pipeline` with all parameters empty except the following
+        * workflow input parameters
+            * `cpd_analysis_pipeline.cppipe_file`: `this.analysis_cppipe`
+            * `cpd_analysis_pipeline.illum_directory_gsurl`: `this.illumination_correction_result_destination`
+            * `cpd_analysis_pipeline.images_directory_gsurl`: `this.images`
+            * `cpd_analysis_pipeline.load_data_csv`: `this.load_data_with_illum_csv`
+            * `cpd_analysis_pipeline.output_directory_gsurl`: `this.analysis_result_destination`
+    * `4_cytomining` with all parameters empty except the following
+        * workflow input parameters
+            * `cytomining.cellprofiler_analysis_directory_gsurl`: `this.analysis_result_destination`
+            * `cytomining.output_directory_gsurl`: `this.cytoming_result_destination`
+            * `cytomining.plate_id`:`this.plate_id`
+            * `cytomining.plate_map_file`: `this.plate_map`
+    * **Note:** you may want to uncheck the "use call caching" box if your workflow run completes immediately because the particular plate has been previously analyzed with the workflow.
 
 ---
 # What's in this workspace?
@@ -89,7 +115,7 @@ The required inputs are:
 [Data tables](https://support.terra.bio/hc/en-us/articles/360025758392-Managing-data-with-tables-) are used to define the collection of workflow instances to be run. **NOTE** Be sure to run notebook `create_terra_data_table.ipynb` so that the data tables in your clone are updated to have output result paths in your clone's workspace bucket instead of the source workspace.
 
 ### plate
-Use Data Table "plate" to run all four workflows.
+Use Data Table "plate" to run workflows  `0_create_load_data`, `2_cp_illumination_pipeline`, `3_cpd_analysis_pipeline`, and `4_cytomining`.
 
 ---
 ## Files
