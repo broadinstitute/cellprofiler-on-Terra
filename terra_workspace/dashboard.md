@@ -1,12 +1,10 @@
 # CellProfiler workflows on Terra
 
-For this demonstration, we will use the image data, metadata, and [CellProfiler](https://cellprofiler.org/) pipelines from:
+For this demonstration, we will use four plates of image data, metadata, and [CellProfiler](https://cellprofiler.org/) pipelines from:
 
 > [Three million images and morphological profiles of cells treated with matched chemical and genetic perturbations](https://www.biorxiv.org/content/10.1101/2022.01.05.475090v1), Chandrasekaran et al., 2022
 
-All the code can be found in our [GitHub repo](https://github.com/broadinstitute/cellprofiler-on-Terra). 
-
-Please feel free to give us feedback on its usability via [GitHub issues](https://github.com/broadinstitute/cellprofiler-on-Terra/issues) or email.
+The workflows are published in [Dockstore](https://dockstore.org/search?organization=broadinstitute&entryType=workflows&search=cellprofiler), the code is in https://github.com/broadinstitute/cellprofiler-on-Terra, and for any feedback or issues please see [GitHub issues](https://github.com/broadinstitute/cellprofiler-on-Terra/issues).
 
 # How do I get started?
 
