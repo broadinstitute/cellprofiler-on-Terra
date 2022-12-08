@@ -14,6 +14,7 @@ Please feel free to give us feedback on its usability via [GitHub issues](https:
     * Need help? See [video tutorial](https://www.youtube.com/watch?v=mYUNQyAJ6WI) and [docs](https://support.terra.bio/hc/en-us/articles/360026130851-Make-your-own-project-workspace).
 2. Run notebook `create_terra_data_tables.ipynb` so that the data tables in your clone are updated to have output result paths in your clone's workspace bucket instead of the source workspace.
 3. Use Data Table "plate" to run the workflows in this order:
+    * **Need help?** See [video tutorial](https://youtu.be/aHqp76vx5V8?t=150) and [docs](https://support.terra.bio/hc/en-us/articles/360034701991-Pipelining-with-workflows).
     * `0_create_load_data` with all parameters empty except the following
         * workflow input parameters
             * `create_load_data.config_yaml`: `this.config`
@@ -42,7 +43,6 @@ Please feel free to give us feedback on its usability via [GitHub issues](https:
             * `cytomining.output_directory_gsurl`: `this.cytoming_result_destination`
             * `cytomining.plate_id`:`this.plate_id`
             * `cytomining.plate_map_file`: `this.plate_map`
-    * **Need help?** See [video tutorial](https://youtu.be/aHqp76vx5V8?t=150) and [docs](https://support.terra.bio/hc/en-us/articles/360034701991-Pipelining-with-workflows).
     * **Note:** you may want to uncheck the "use call caching" box if your workflow run completes immediately because the particular plate has been previously analyzed with the workflow.
 
 ---
