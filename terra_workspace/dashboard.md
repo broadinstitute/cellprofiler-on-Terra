@@ -42,8 +42,8 @@ Please feel free to give us feedback on its usability via [GitHub issues](https:
             * `cytomining.output_directory_gsurl`: `this.cytoming_result_destination`
             * `cytomining.plate_id`:`this.plate_id`
             * `cytomining.plate_map_file`: `this.plate_map`
-  * **Need help?** See [video tutorial](https://youtu.be/aHqp76vx5V8?t=150) and [docs](https://support.terra.bio/hc/en-us/articles/360034701991-Pipelining-with-workflows).
-  **Note:** you may want to uncheck the "use call caching" box if your workflow run completes immediately because the particular plate has been previously analyzed with the workflow.
+    * **Need help?** See [video tutorial](https://youtu.be/aHqp76vx5V8?t=150) and [docs](https://support.terra.bio/hc/en-us/articles/360034701991-Pipelining-with-workflows).
+    * **Note:** you may want to uncheck the "use call caching" box if your workflow run completes immediately because the particular plate has been previously analyzed with the workflow.
 
 ---
 # What's in this workspace?
