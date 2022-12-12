@@ -352,6 +352,7 @@ task cellprofiler_pipeline_task {
   # NOTE: load_data.csv must specify that all the images are in /cromwell_root/data and /cromwell_root/illum
   String input_image_dir = "/cromwell_root/data"
   String illum_image_dir = "/cromwell_root/illum"
+  Int last_file_index = length(all_images_files) - 1
   String tarball_name = "outputs.tar.gz"
 
   command <<<
@@ -379,7 +380,7 @@ task cellprofiler_pipeline_task {
     cromwell_image_dir=$(dirname ~{all_images_files[0]})
     # locate the cromwell directory with all the illum files, if applicable
     # if specified, the illum files will occur at the end of the file array
-    cromwell_illum_dir=$(dirname ~{all_images_files[length(all_image_files] - 1})
+    cromwell_illum_dir=$(dirname ~{all_images_files[last_file_index]})
 
     # for logging purposes, print some information
     echo "Directory containing load_data.csv ============================="
