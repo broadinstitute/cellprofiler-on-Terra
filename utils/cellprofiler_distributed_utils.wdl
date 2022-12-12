@@ -377,6 +377,9 @@ task cellprofiler_pipeline_task {
 
     # locate the cromwell directory with all the images
     cromwell_image_dir=$(dirname ~{all_images_files[0]})
+    # locate the cromwell directory with all the illum files, if applicable
+    # if specified, the illum files will occur at the end of the file array
+    cromwell_illum_dir=$(dirname ~{all_images_files[length(all_image_files] - 1})
 
     # for logging purposes, print some information
     echo "Directory containing load_data.csv ============================="
@@ -386,6 +389,9 @@ task cellprofiler_pipeline_task {
     echo "Directory of images (determined by Cromwell) ==================="
     echo $cromwell_image_dir
     ls -lah $cromwell_image_dir
+    echo "Directory of illum files (if applicable, determined by Cromwell) ==================="
+    echo $cromwell_illum_dir
+    ls -lah $cromwell_illum_dir
     pwd
 
     # move the images to a precisely-known path
@@ -395,7 +401,10 @@ task cellprofiler_pipeline_task {
 
     # move the illum images to a precisely-known path
     mkdir ~{illum_image_dir}
+    # handle the case where the illum files were stored along side the images
     [ -n "$(shopt -s nullglob; echo $cromwell_image_dir/illum/*.npy)" ] && mv $cromwell_image_dir/illum/*.npy ~{illum_image_dir}
+    # handle the case where the illum files were stored separately from the images
+    [ -n "$(shopt -s nullglob; echo $cromwell_illum_dir/*.npy)" ] && mv $cromwell_illum_dir/*.npy ~{illum_image_dir}
 
     # make a directory to contain the outputs
     mkdir output
