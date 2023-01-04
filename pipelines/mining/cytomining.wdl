@@ -208,8 +208,8 @@ workflow cytomining {
   }
 
   output {
-    File monitoring_log = profiling.monitoring_log
-    File log = profiling.log
+    File? monitoring_log = profiling.monitoring_log
+    File? log = profiling.log
   }
 
 }
