@@ -75,8 +75,8 @@ workflow create_load_data {
   }
 
   output {
-    File? load_data_csv = script.load_data_csv
-    File? load_data_with_illum_csv = script.load_data_with_illum_csv
+    File load_data_csv = select_first([script.load_data_csv, stderr()])
+    File load_data_with_illum_csv = select_first([script.load_data_with_illum_csv, stderr()])
   }
 
 }

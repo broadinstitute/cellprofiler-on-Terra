@@ -65,7 +65,7 @@ workflow cp_illumination_pipeline {
 
   output {
     String images_output_directory = images_directory
-    String? illum_output_directory = rsync_illum.output_directory
+    String illum_output_directory = select_first([rsync_illum.output_directory, ""])
   }
 
 }
