@@ -23,7 +23,7 @@ workflow create_load_data {
     # and lets you pull metadata out of the image.
     File config_yaml
 
-    # Output directory, used to be the same than images directory:
+    # Output directory
     String destination_directory_gsurl
 
   }
@@ -32,39 +32,51 @@ workflow create_load_data {
   String images_directory = sub(images_directory_gsurl, "/+$", "")
   String destination_directory = sub(destination_directory_gsurl, "/+$", "")
 
-  # Define the input files, so that we use Cromwell's automatic file localization
-  call util.gsutil_ls_to_file as directory {
+  # check write permission on output bucket
+  call util.gcloud_is_bucket_writable as permission_check {
     input:
-      directory_gsurl=images_directory,
-      file_extension=file_extension,
+      gsurls=[destination_directory],
   }
 
-  # Create the load_data.csv file
-  call util.generate_load_data_csv as script {
-    input:
-      xml_file = images_directory + "/Index.idx.xml",
-      config_yaml = config_yaml,
-      plate_id = plate_id,
-      stdout = directory.out
-  }
+  # run the compute only if output bucket is writable
+  Boolean is_bucket_writable = permission_check.is_bucket_writable
+  if (is_bucket_writable) {
 
-  # Save load_data.csv file
-  call util.gsutil_delocalize {
-    input:
-      file=script.load_data_csv,
-      destination_gsurl=destination_directory,
-  }
+    # Define the input files, so that we use Cromwell's automatic file localization
+    call util.gsutil_ls_to_file as directory {
+      input:
+        directory_gsurl=images_directory,
+        file_extension=file_extension,
+    }
 
-  # Save load_data_will_illum.csv file
-  call util.gsutil_delocalize as save_illum{
-    input:
-      file=script.load_data_with_illum_csv,
-      destination_gsurl=destination_directory,
+    # Create the load_data.csv file
+    call util.generate_load_data_csv as script {
+      input:
+        xml_file = images_directory + "/Index.idx.xml",
+        config_yaml = config_yaml,
+        plate_id = plate_id,
+        stdout = directory.out
+    }
+
+    # Save load_data.csv file
+    call util.gsutil_delocalize {
+      input:
+        file=script.load_data_csv,
+        destination_gsurl=destination_directory,
+    }
+
+    # Save load_data_will_illum.csv file
+    call util.gsutil_delocalize as save_illum{
+      input:
+        file=script.load_data_with_illum_csv,
+        destination_gsurl=destination_directory,
+    }
+
   }
 
   output {
-    File load_data_csv = script.load_data_csv
-    File load_data_with_illum_csv = script.load_data_with_illum_csv
+    File? load_data_csv = script.load_data_csv
+    File? load_data_with_illum_csv = script.load_data_with_illum_csv
   }
 
 }
