@@ -29,26 +29,38 @@ workflow cp_illumination_pipeline {
   String images_directory = sub(images_directory_gsurl, "/+$", "")
   String output_illum_directory = sub(output_illum_directory_gsurl, "/+$", "")
 
-  # Define the input files, so that we use Cromwell's automatic file localization
-  call util.gsutil_ls as directory {
+  # check write permission on output bucket
+  call util.gcloud_is_bucket_writable as permission_check {
     input:
-      directory_gsurl=images_directory,
-      file_extension=file_extension,
+      gsurls=[output_illum_directory],
   }
 
-  # Run CellProfiler pipeline
-  call util.cellprofiler_pipeline_task as cellprofiler {
-    input:
-      all_images_files = directory.file_array,  # from util.gsutil_ls task
-      cppipe_file = cppipe_file,
-      load_data_csv = load_data
-  }
+  # run the compute only if output bucket is writable
+  Boolean is_bucket_writable = permission_check.is_bucket_writable
+  if (is_bucket_writable) {
 
-  # Delocalize outputs illum images
-  call util.extract_and_gsutil_rsync as rsync_illum {
-    input:
-      tarball=cellprofiler.tarball,
-      destination_gsurl=output_illum_directory,
+    # Define the input files, so that we use Cromwell's automatic file localization
+    call util.gsutil_ls as directory {
+      input:
+        directory_gsurl=images_directory,
+        file_extension=file_extension,
+    }
+
+    # Run CellProfiler pipeline
+    call util.cellprofiler_pipeline_task as cellprofiler {
+      input:
+        all_images_files = directory.file_array,  # from util.gsutil_ls task
+        cppipe_file = cppipe_file,
+        load_data_csv = load_data
+    }
+
+    # Delocalize outputs illum images
+    call util.extract_and_gsutil_rsync as rsync_illum {
+      input:
+        tarball=cellprofiler.tarball,
+        destination_gsurl=output_illum_directory,
+    }
+
   }
 
   output {
