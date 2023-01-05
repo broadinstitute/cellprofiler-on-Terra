@@ -44,8 +44,7 @@ workflow cellprofiler_pipeline {
         gsurls=[output_directory],
     }
   }
-  Boolean? permission = permission_check.is_bucket_writable
-  Boolean no_permission_error = if defined(permission) then permission else true
+  Boolean no_permission_error = select_first([permission_check.is_bucket_writable, true])
   if (no_permission_error) {
 
     # Define the input files, so that we use Cromwell's automatic file localization
