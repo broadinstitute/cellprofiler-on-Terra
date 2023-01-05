@@ -460,6 +460,9 @@ task gcloud_is_bucket_writable {
     set -e
     bearer=$(gcloud auth application-default print-access-token)
 
+    # initially assume we do not have permission
+    echo false > ~{result_filename}
+
     for gsurl in ~{sep=" " gsurls}; do
 
       # check write permission on output google bucket
@@ -489,7 +492,9 @@ task gcloud_is_bucket_writable {
 
     done
 
+    # if we made it here without exiting due to error, then we have permission
     echo true > ~{result_filename}
+    exit 0
   >>>
 
   output {
