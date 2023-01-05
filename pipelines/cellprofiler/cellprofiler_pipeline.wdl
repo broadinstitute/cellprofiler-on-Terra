@@ -36,15 +36,17 @@ workflow cellprofiler_pipeline {
   String input_directory = sub(input_directory_gsurl, "/+$", "")
   String output_directory = sub(output_directory_gsurl, "/+$", "")
 
-  # check write permission on output bucket
-  call util.gcloud_is_bucket_writable as permission_check {
-    input:
-      gsurls=[output_directory],
+  # fail fast if output bucket is specified and user lacks write permissions
+  if (output_directory_gsurl != "") {
+    # check write permission on output bucket
+    call util.gcloud_is_bucket_writable as permission_check {
+      input:
+        gsurls=[output_directory],
+    }
   }
-
-  # run the compute only if output bucket is writable
-  Boolean is_bucket_writable = permission_check.is_bucket_writable
-  if (is_bucket_writable) {
+  Boolean? permission = permission_check.is_bucket_writable
+  Boolean no_permission_error = if defined(permission) then permission else true
+  if (no_permission_error) {
 
     # Define the input files, so that we use Cromwell's automatic file localization
     call util.gsutil_ls_to_file as directory {
