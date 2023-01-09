@@ -11,6 +11,7 @@ runs:
       with:
         python-version: '3.7'
         cache: 'pip'  # caching pip dependencies
+        update-environment: false
     - name: Download miniwdl
       run: |
         pip install miniwdl==${{ inputs.MINIWDL_VERSION }};
