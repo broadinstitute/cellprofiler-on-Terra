@@ -7,9 +7,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - uses: ./.github/actions/install-miniwdl
+      - uses: actions/setup-python@v4
         with:
-          MINIWDL_VERSION: ${{ env.MINIWDL_VERSION }}
+          python-version: '3.7'
       - name: 'Install miniwdl and Run Validation Test'
-        run: ./tests/miniwdl_check_wdl.sh
+        run: |
+          pip install miniwdl==${{ inputs.MINIWDL_VERSION }};
+          ./tests/miniwdl_check_wdl.sh;
         shell: bash
