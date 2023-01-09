@@ -12,6 +12,6 @@ jobs:
           python-version: '3.7'
       - name: 'Install miniwdl and Run Validation Test'
         run: |
-          pip install miniwdl==${{ inputs.MINIWDL_VERSION }};
+          pip install miniwdl==$MINIWDL_VERSION;
           ./tests/miniwdl_check_wdl.sh;
         shell: bash
