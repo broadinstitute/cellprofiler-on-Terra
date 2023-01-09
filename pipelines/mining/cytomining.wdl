@@ -208,8 +208,8 @@ workflow cytomining {
   }
 
   output {
-    File monitoring_log = select_first([profiling.monitoring_log, stderr()])
-    File log = select_first([profiling.log, stderr()])
+    File monitoring_log = select_first([profiling.monitoring_log, permission_check.log])
+    File log = select_first([profiling.log, permission_check.log])
   }
 
 }

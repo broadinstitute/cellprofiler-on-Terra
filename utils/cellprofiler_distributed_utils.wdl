@@ -499,6 +499,7 @@ task gcloud_is_bucket_writable {
 
   output {
     Boolean is_bucket_writable = read_boolean(result_filename)
+    File log = stdout()
   }
 
   runtime {

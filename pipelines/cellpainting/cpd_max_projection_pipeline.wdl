@@ -101,8 +101,8 @@ workflow cpd_max_projection_distributed {
 
   output {
     String images_projected_directory_gsurl = output_directory
-    File load_data_csv = select_first([script.load_data_csv, stderr()])
-    File load_data_with_illum_csv = select_first([script.load_data_with_illum_csv, stderr()])
+    File load_data_csv = select_first([script.load_data_csv, permission_check.log])
+    File load_data_with_illum_csv = select_first([script.load_data_with_illum_csv, permission_check.log])
   }
 
 }

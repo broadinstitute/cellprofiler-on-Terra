@@ -127,8 +127,8 @@ workflow cellprofiler_pipeline {
   }
 
   output {
-    Array[File] cellprofiler_tarballs = select_first([output_tarball_array, [stderr()]])
-    Array[File] cellprofiler_logs = select_first([output_log_array, [stderr()]])
+    Array[File] cellprofiler_tarballs = select_first([output_tarball_array])
+    Array[File] cellprofiler_logs = select_first([output_log_array])
     String output_path = output_directory
   }
 
