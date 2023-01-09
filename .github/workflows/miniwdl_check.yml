@@ -3,7 +3,7 @@ on: [pull_request]
 env:
   MINIWDL_VERSION: 1.8.0
 jobs:
-  womtool-validate:
+  miniwdl-check:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
