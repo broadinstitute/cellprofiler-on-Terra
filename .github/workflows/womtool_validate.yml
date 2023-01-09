@@ -11,5 +11,5 @@ jobs:
         with:
           CROMWELL_VERSION: ${{ env.CROMWELL_VERSION }}
       - name: 'Run Scripts WDL Validation Test'
-        run: ./tests/validate_wdl.sh
+        run: ./tests/womtool_validate_wdl.sh
         shell: bash
