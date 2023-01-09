@@ -16,7 +16,7 @@ task profiling {
     String plate_id
 
     # Pycytominer aggregation step
-    String? aggregation_operation = "mean"
+    String aggregation_operation = "mean"
 
     # Pycytominer annotation step
     File plate_map_file

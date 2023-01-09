@@ -41,8 +41,6 @@ workflow cellpainting_workflow {
     #######################################
     # Cellprofiler pipeline specification
     File illumination_cppipe_file
-    # And the desired location of the illum images
-    String images_projected_output_directory_gsurl
 
     ####################################
     #### arguments for cpd_analysis ####
