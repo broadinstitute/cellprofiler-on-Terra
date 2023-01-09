@@ -1,0 +1,15 @@
+name: 'Validate all WDLs using miniwdl'
+on: [pull_request]
+env:
+  MINIWDL_VERSION: 1.8.0
+jobs:
+  womtool-validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: ./.github/actions/install-miniwdl
+        with:
+          MINIWDL_VERSION: ${{ env.MINIWDL_VERSION }}
+      - name: 'Install miniwdl and Run Validation Test'
+        run: ./tests/miniwdl_check_wdl.sh
+        shell: bash
