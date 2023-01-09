@@ -1,9 +1,14 @@
+# Mac
+.DS_Store
+
 # Cromwell / womtool generated files to submit jobs
 .dot
 .inputs
 .input
 .png
 .json
+.zip
+.pdf
 
 # History files
 .Rhistory
