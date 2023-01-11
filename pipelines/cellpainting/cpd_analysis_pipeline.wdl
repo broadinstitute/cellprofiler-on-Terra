@@ -14,7 +14,7 @@ workflow cpd_analysis_pipeline {
 
     # Specify input file information
     String images_directory_gsurl
-    File load_data_csv
+    File load_data_with_illum_csv
     String illum_directory_gsurl = "${images_directory}/illum"
 
     # Cellprofiler pipeline specification
@@ -46,7 +46,7 @@ workflow cpd_analysis_pipeline {
     # Create an index to scatter
     call util.scatter_index as idx {
       input:
-        load_data_csv= load_data_csv,
+        load_data_csv= load_data_with_illum_csv,
         splitby_metadata = splitby_metadata,
     }
 
@@ -56,7 +56,7 @@ workflow cpd_analysis_pipeline {
         input:
           image_directory =  images_directory,
           illum_directory = illum_directory,
-          load_data_csv = load_data_csv,
+          load_data_csv = load_data_with_illum_csv,
           splitby_metadata = splitby_metadata,
           index = index,
       }
