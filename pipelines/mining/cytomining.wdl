@@ -1,5 +1,7 @@
 version 1.0
 
+import "../../utils/cellprofiler_distributed_utils.wdl" as util
+
 ## Copyright Broad Institute, 2021
 ##
 ## LICENSING :
@@ -49,33 +51,6 @@ task profiling {
 
     # run monitoring script
     monitor_script.sh > monitoring.log &
-
-    # assert write permission on output google bucket
-    echo "Checking for write permissions on output bucket ====================="
-    gsurl="~{output_directory}"
-    if [[ ${gsurl} != "gs://"* ]]; then
-       echo "Bad gsURL: '${gsurl}' must begin with 'gs://' to be a valid google bucket path."
-       exit 3
-    fi
-    bearer=$(gcloud auth application-default print-access-token)
-    bucket_name=$(echo "${gsurl#gs://}" | sed 's/\/.*//')
-    api_call="https://storage.googleapis.com/storage/v1/b/${bucket_name}/iam/testPermissions?permissions=storage.objects.create"
-    curl "${api_call}" --header "Authorization: Bearer $bearer" --header "Accept: application/json" --compressed > response.json
-    echo "gsURL: ${gsurl}"
-    echo "Bucket name: ${bucket_name}"
-    echo "API call: ${api_call}"
-    echo "Response:"
-    cat response.json
-    echo "\n... end of response"
-    python_json_parsing="import sys, json; print(str('storage.objects.create' in json.load(sys.stdin).get('permissions', ['none'])).lower())"
-    permission=$(cat response.json | python -c "${python_json_parsing}")
-    echo "Inferred permission after parsing response JSON: ${permission}"
-    if [[ $permission == false ]]; then
-       echo "The specified gsURL ${gsurl} cannot be written to."
-       echo "You need storage.objects.create permission on the bucket ${bucket_name}"
-       exit 3
-    fi
-    echo "====================================================================="
 
     # display for log
     echo "Localizing data from ~{cellprofiler_analysis_directory}"
@@ -212,17 +187,29 @@ workflow cytomining {
     String output_directory_gsurl
   }
 
-  call profiling {
+  # check write permission on output bucket
+  call util.gcloud_is_bucket_writable as permission_check {
     input:
+      gsurls=[output_directory_gsurl],
+  }
+
+  # run the compute only if output bucket is writable
+  Boolean is_bucket_writable = permission_check.is_bucket_writable
+  if (is_bucket_writable) {
+
+    call profiling {
+      input:
         cellprofiler_analysis_directory_gsurl = cellprofiler_analysis_directory_gsurl,
         plate_id = plate_id,
         plate_map_file = plate_map_file,
         output_directory_gsurl = output_directory_gsurl,
+    }
+
   }
 
   output {
-    File monitoring_log = profiling.monitoring_log
-    File log = profiling.log
+    File monitoring_log = select_first([profiling.monitoring_log, permission_check.log])
+    File log = select_first([profiling.log, permission_check.log])
   }
 
 }

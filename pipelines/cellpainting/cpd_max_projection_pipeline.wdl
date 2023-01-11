@@ -34,63 +34,75 @@ workflow cpd_max_projection_distributed {
   String output_directory = sub(output_images_directory_gsurl, "/+$", "")
   String output_load_data_directory = sub(output_load_data_directory_gsurl, "/+$", "")
 
-  # Create an index to scatter
-  call util.scatter_index as idx {
+  # check write permission on output bucket
+  call util.gcloud_is_bucket_writable as permission_check {
     input:
-      load_data_csv= load_data,
-      splitby_metadata = splitby_metadata,
+      gsurls=[output_directory, output_load_data_directory],
   }
 
-  # Run CellProfiler pipeline scattered
-  scatter(index in idx.value) {
-    call util.splitto_scatter as sp {
+  # run the compute only if output bucket is writable
+  Boolean is_bucket_writable = permission_check.is_bucket_writable
+  if (is_bucket_writable) {
+
+    # Create an index to scatter
+    call util.scatter_index as idx {
       input:
-        image_directory =  images_directory,
-        illum_directory = "/illum",  # default
-        load_data_csv = load_data,
+        load_data_csv= load_data,
         splitby_metadata = splitby_metadata,
-        index = index,
     }
 
-    call util.cellprofiler_pipeline_task as cellprofiler {
+    # Run CellProfiler pipeline scattered
+    scatter(index in idx.value) {
+      call util.splitto_scatter as sp {
+        input:
+          image_directory =  images_directory,
+          illum_directory = "/illum",  # default
+          load_data_csv = load_data,
+          splitby_metadata = splitby_metadata,
+          index = index,
+      }
+
+      call util.cellprofiler_pipeline_task as cellprofiler {
+        input:
+          all_images_files = sp.array_output,
+          cppipe_file = cppipe_file,
+          load_data_csv = sp.output_tiny_csv,
+      }
+
+      call util.extract_and_gsutil_rsync {
+        input:
+          tarball=cellprofiler.tarball,
+          destination_gsurl=output_images_directory_gsurl,
+      }
+    }
+
+    # Create new load_data/load_data_with_illum csv files with the new projected images
+    call util.filter_csv as script {
       input:
-        all_images_files = sp.array_output,
-        cppipe_file = cppipe_file,
-        load_data_csv = sp.output_tiny_csv,
+        full_load_data_csv= load_data,
+        full_load_data_with_illum_csv= load_data_with_illum,
     }
 
-    call util.extract_and_gsutil_rsync {
+    # Save load_data.csv file
+    call util.gsutil_delocalize as save_load_data {
       input:
-        tarball=cellprofiler.tarball,
-        destination_gsurl=output_images_directory_gsurl,
+        file=script.load_data_csv,
+        destination_gsurl=output_load_data_directory,
     }
-  }
 
-  # Create new load_data/load_data_with_illum csv files with the new projected images
-  call util.filter_csv as script {
-    input:
-      full_load_data_csv= load_data,
-      full_load_data_with_illum_csv= load_data_with_illum,
-  }
+    # Save load_data_will_illum.csv file
+    call util.gsutil_delocalize as save_illum {
+      input:
+        file=script.load_data_with_illum_csv,
+        destination_gsurl=output_load_data_directory,
+    }
 
-  # Save load_data.csv file
-  call util.gsutil_delocalize as save_load_data {
-    input:
-      file=script.load_data_csv,
-      destination_gsurl=output_load_data_directory,
-  }
-
-  # Save load_data_will_illum.csv file
-  call util.gsutil_delocalize as save_illum {
-    input:
-      file=script.load_data_with_illum_csv,
-      destination_gsurl=output_load_data_directory,
   }
 
   output {
-    String images_projected_directory_gsurl = output_images_directory_gsurl
-    File load_data_csv = script.load_data_csv
-    File load_data_with_illum_csv = script.load_data_with_illum_csv
+    String images_projected_directory_gsurl = output_directory
+    File load_data_csv = select_first([script.load_data_csv, permission_check.log])
+    File load_data_with_illum_csv = select_first([script.load_data_with_illum_csv, permission_check.log])
   }
 
 }
