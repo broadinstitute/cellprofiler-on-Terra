@@ -92,7 +92,7 @@ workflow cellpainting_workflow {
     input:
       images_directory_gsurl = cp_illumination.images_output_directory,
       # illum_directory_gsurl = cp_illumination.illum_output_directory,
-      load_data_csv = cpd_max_projection.load_data_with_illum_csv,
+      load_data_with_illum_csv = cpd_max_projection.load_data_with_illum_csv,
       cppipe_file = analysis_cppipe_file,
       output_directory_gsurl = analysis_output_directory_gsurl,
   }
