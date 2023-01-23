@@ -41,7 +41,20 @@ The workflows are published in [Dockstore](https://dockstore.org/search?organiza
             * `cytomining.output_directory_gsurl`: `this.cytoming_result_destination`
             * `cytomining.plate_id`:`this.plate_id`
             * `cytomining.plate_map_file`: `this.plate_map`
-    * **Note:** you may want to uncheck the "use call caching" box if your workflow run completes immediately because the particular plate has been previously analyzed with the workflow.
+
+
+## Estimated time and cost to run on sample data
+
+Workflow name              |Time |Cost $  |View a completed run of this workflow
+---------------------------|-----|--------|-------------------------------------
+0_create_load_data         | 15m | $0.03  |[Jan 19, 2023, 1:36 PM](https://app.terra.bio/#workspaces/bayer-pcl-cell-imaging/cellpainting/job_history/6e382af8-0503-44dc-8145-ae98538ee128)
+2_cp_illumination_pipeline | 10h | $2.64  |[Jan 19, 2023, 1:55 PM](https://app.terra.bio/#workspaces/bayer-pcl-cell-imaging/cellpainting/job_history/69508326-8863-45dc-b47f-2cce3ce54785)
+3_cpd_analysis_pipeline    |  3h | $50.67 |[Jan 22, 2023, 8:13 AM](https://app.terra.bio/#workspaces/bayer-pcl-cell-imaging/cellpainting/job_history/0b5b4039-ce25-4ebb-ac1b-3b18b4777a49)
+4_cytomining               |  6h | $1.65  |[Jan 22, 2023, 11:13 AM](https://app.terra.bio/#workspaces/bayer-pcl-cell-imaging/cellpainting/job_history/3e44ad8e-eb27-4a26-a0d1-ac341b14dcb7)
+
+
+**Note:** you may want to uncheck the "use call caching" box if your workflow run completes immediately because the particular plate has been previously analyzed with the workflow.
+
 
 ---
 # What's in this workspace?
