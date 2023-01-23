@@ -136,17 +136,16 @@ Browse the files in the workspace bucket to see what is held in this workspace o
 
 In this source workspace, you will see directories like:
 ```
-ee8db2ec-7f9a-43dc-a5ad-b41130d4ea2a/   # A workflow run
-f99037f7-041c-4d85-b12f-71b8e0bcf28b/   # Another workflow run
-notebooks/                              # Jupyter notebooks
-pe2loaddata_config/                     # pe2loaddata configuration file for all four plates.
-source_4_images/                        # The Index.xml and *.tiff files for four plates.
-cellprofiler_pipelines                  # CellProfiler pipeline definition files.
-plate_maps/                             # TSV plate maps and also the plate map catalog for the larger experiment.
 0_create_load_data/                     # The resulting load_data.csv and load_data_with_illum.csv files resulting from the workflow run of pe2loaddata.
 2_cp_illumination_pipeline/             # The resulting *.npy files resulting from the workflow run CellProfile illumination correction.
 3_cpd_analysis_pipeline/                # The resulting CSV and PNG files from the workflow run of CellProfiler analysis.
 4_cytomining/                           # The resulting SQLlite file from the workflow run of Cytomining.
+cellprofiler_pipelines                  # CellProfiler pipeline definition files.
+notebooks/                              # Jupyter notebooks
+pe2loaddata_config/                     # pe2loaddata configuration file for all four plates.
+plate_maps/                             # TSV plate maps and also the plate map catalog for the larger experiment.
+source_4_images/                        # The Index.xml and *.tiff files for four plates.
+submissions/                              # The workflows run
 ```
 
 **Note:** In your cloned workspace, you will only see the `notebooks` directory at first. The data tables in your workspace clone will be referring to files stored in the source workspace.
