@@ -10,8 +10,9 @@ The workflows are published in [Dockstore](https://dockstore.org/search?organiza
 
 1. Clone this workspace.
     * Need help? See the Terra workspace [video tutorial](https://www.youtube.com/watch?v=mYUNQyAJ6WI) and [docs](https://support.terra.bio/hc/en-us/articles/360026130851-Make-your-own-project-workspace).
-2. Run notebook `create_terra_data_tables.ipynb` so that the data tables in your clone are updated to have output result paths in your clone's workspace bucket instead of the source workspace.
-3. Use Data Table "plate" to run the workflows in this order:
+2. Run notebook `create_terra_data_tables.ipynb` so that the data tables in your clone are updated to have output result paths in your clone's workspace bucket instead of the source workspace. Use the default environment when creating the Jupyter cloud enviroment.
+    * Need help? See the Terra Jupyter notebook [video tutorial](https://www.youtube.com/watch?v=DO7idRZtWkA) and [docs](https://support.terra.bio/hc/en-us/articles/9612453133467).
+3. Use Data Table "plate" to run the workflows; in this example we selected the 4 plates, but you can also select just one. Run the workflows in the following order:
     * Need help? See the Terra workflow [video tutorial](https://youtu.be/aHqp76vx5V8) and [docs](https://support.terra.bio/hc/en-us/articles/360034701991-Pipelining-with-workflows).
     * `0_create_load_data` with all parameters empty except the following
         * workflow input parameters
@@ -41,7 +42,22 @@ The workflows are published in [Dockstore](https://dockstore.org/search?organiza
             * `cytomining.output_directory_gsurl`: `this.cytoming_result_destination`
             * `cytomining.plate_id`:`this.plate_id`
             * `cytomining.plate_map_file`: `this.plate_map`
-    * **Note:** you may want to uncheck the "use call caching" box if your workflow run completes immediately because the particular plate has been previously analyzed with the workflow.
+
+
+## Estimated time and cost to run on sample data
+
+Sample data consist of a set of 4x 384 well plates, 9 fields of views per well and 8 channels per image. 
+
+Workflow name              |Time |Cost $  |View a completed run of this workflow
+---------------------------|-----|--------|-------------------------------------
+0_create_load_data         | 15m | $0.03  |[Jan 19, 2023, 1:36 PM](https://app.terra.bio/#workspaces/bayer-pcl-cell-imaging/cellpainting/job_history/6e382af8-0503-44dc-8145-ae98538ee128)
+2_cp_illumination_pipeline | 10h | $2.64  |[Jan 19, 2023, 1:55 PM](https://app.terra.bio/#workspaces/bayer-pcl-cell-imaging/cellpainting/job_history/69508326-8863-45dc-b47f-2cce3ce54785)
+3_cpd_analysis_pipeline    |  3h | $50.67 |[Jan 22, 2023, 8:13 AM](https://app.terra.bio/#workspaces/bayer-pcl-cell-imaging/cellpainting/job_history/0b5b4039-ce25-4ebb-ac1b-3b18b4777a49)
+4_cytomining               |  6h | $1.65  |[Jan 22, 2023, 11:13 AM](https://app.terra.bio/#workspaces/bayer-pcl-cell-imaging/cellpainting/job_history/3e44ad8e-eb27-4a26-a0d1-ac341b14dcb7)
+
+
+**Note:** you may want to uncheck the "use call caching" box if your workflow run completes immediately because the particular plate has been previously analyzed with the workflow.
+
 
 ---
 # What's in this workspace?
@@ -123,17 +139,16 @@ Browse the files in the workspace bucket to see what is held in this workspace o
 
 In this source workspace, you will see directories like:
 ```
-ee8db2ec-7f9a-43dc-a5ad-b41130d4ea2a/   # A workflow run
-f99037f7-041c-4d85-b12f-71b8e0bcf28b/   # Another workflow run
-notebooks/                              # Jupyter notebooks
-pe2loaddata_config/                     # pe2loaddata configuration file for all four plates.
-source_4_images/                        # The Index.xml and *.tiff files for four plates.
-cellprofiler_pipelines                  # CellProfiler pipeline definition files.
-plate_maps/                             # TSV plate maps and also the plate map catalog for the larger experiment.
 0_create_load_data/                     # The resulting load_data.csv and load_data_with_illum.csv files resulting from the workflow run of pe2loaddata.
 2_cp_illumination_pipeline/             # The resulting *.npy files resulting from the workflow run CellProfile illumination correction.
 3_cpd_analysis_pipeline/                # The resulting CSV and PNG files from the workflow run of CellProfiler analysis.
 4_cytomining/                           # The resulting SQLlite file from the workflow run of Cytomining.
+cellprofiler_pipelines                  # CellProfiler pipeline definition files.
+notebooks/                              # Jupyter notebooks
+pe2loaddata_config/                     # pe2loaddata configuration file for all four plates.
+plate_maps/                             # TSV plate maps and also the plate map catalog for the larger experiment.
+source_4_images/                        # The Index.xml and *.tiff files for four plates.
+submissions/                            # Execution directory of each of the submitted workflows; where you can find the stderr, stdout, and backend logs.
 ```
 
 **Note:** In your cloned workspace, you will only see the `notebooks` directory at first. The data tables in your workspace clone will be referring to files stored in the source workspace.
