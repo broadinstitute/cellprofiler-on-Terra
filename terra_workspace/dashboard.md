@@ -10,7 +10,8 @@ The workflows are published in [Dockstore](https://dockstore.org/search?organiza
 
 1. Clone this workspace.
     * Need help? See the Terra workspace [video tutorial](https://www.youtube.com/watch?v=mYUNQyAJ6WI) and [docs](https://support.terra.bio/hc/en-us/articles/360026130851-Make-your-own-project-workspace).
-2. Run notebook `create_terra_data_tables.ipynb` so that the data tables in your clone are updated to have output result paths in your clone's workspace bucket instead of the source workspace.
+2. Run notebook `create_terra_data_tables.ipynb` so that the data tables in your clone are updated to have output result paths in your clone's workspace bucket instead of the source workspace. Use the default environment when creating the Jupyter cloud enviroment.
+    * Need help? See the Terra Jupyter notebook [video tutorial](https://www.youtube.com/watch?v=DO7idRZtWkA) and [docs](https://support.terra.bio/hc/en-us/articles/9612453133467).
 3. Use Data Table "plate" to run the workflows in this order:
     * Need help? See the Terra workflow [video tutorial](https://youtu.be/aHqp76vx5V8) and [docs](https://support.terra.bio/hc/en-us/articles/360034701991-Pipelining-with-workflows).
     * `0_create_load_data` with all parameters empty except the following
@@ -44,6 +45,8 @@ The workflows are published in [Dockstore](https://dockstore.org/search?organiza
 
 
 ## Estimated time and cost to run on sample data
+
+Sample data consist of a set of 4x 384 well plates, 9 fields of views per well and 8 channels per image. 
 
 Workflow name              |Time |Cost $  |View a completed run of this workflow
 ---------------------------|-----|--------|-------------------------------------
