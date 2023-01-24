@@ -145,7 +145,7 @@ notebooks/                              # Jupyter notebooks
 pe2loaddata_config/                     # pe2loaddata configuration file for all four plates.
 plate_maps/                             # TSV plate maps and also the plate map catalog for the larger experiment.
 source_4_images/                        # The Index.xml and *.tiff files for four plates.
-submissions/                              # The workflows run
+submissions/                            # Execution directory of each of the submitted workflows; where you can find the stderr, stdout, and backend logs.
 ```
 
 **Note:** In your cloned workspace, you will only see the `notebooks` directory at first. The data tables in your workspace clone will be referring to files stored in the source workspace.
