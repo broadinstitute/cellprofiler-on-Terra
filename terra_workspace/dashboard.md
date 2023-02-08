@@ -48,12 +48,12 @@ The workflows are published in [Dockstore](https://dockstore.org/search?organiza
 
 Sample data consist of a set of 4x 384 well plates, 9 fields of views per well and 8 channels per image. 
 
-Workflow name              |Time |Cost $  |View a completed run of this workflow
----------------------------|-----|--------|-------------------------------------
-0_create_load_data         | 15m | $0.03  |[Jan 19, 2023, 1:36 PM](https://app.terra.bio/#workspaces/bayer-pcl-cell-imaging/cellpainting/job_history/6e382af8-0503-44dc-8145-ae98538ee128)
-2_cp_illumination_pipeline | 10h | $2.64  |[Jan 19, 2023, 1:55 PM](https://app.terra.bio/#workspaces/bayer-pcl-cell-imaging/cellpainting/job_history/69508326-8863-45dc-b47f-2cce3ce54785)
-3_cpd_analysis_pipeline    |  3h | $50.67 |[Jan 22, 2023, 8:13 AM](https://app.terra.bio/#workspaces/bayer-pcl-cell-imaging/cellpainting/job_history/0b5b4039-ce25-4ebb-ac1b-3b18b4777a49)
-4_cytomining               |  6h | $1.65  |[Jan 22, 2023, 11:13 AM](https://app.terra.bio/#workspaces/bayer-pcl-cell-imaging/cellpainting/job_history/3e44ad8e-eb27-4a26-a0d1-ac341b14dcb7)
+Workflow name              |Time |Batch Cost (Cost per plate)|View a completed run of this workflow
+---------------------------|-----|---------------------------|-------------------------------------
+0_create_load_data         | 15m | $0.03                     |[Jan 19, 2023, 1:36 PM](https://app.terra.bio/#workspaces/bayer-pcl-cell-imaging/cellpainting/job_history/6e382af8-0503-44dc-8145-ae98538ee128)
+2_cp_illumination_pipeline | 10h | $2.64 (~$0.66 per plate)   |[Jan 19, 2023, 1:55 PM](https://app.terra.bio/#workspaces/bayer-pcl-cell-imaging/cellpainting/job_history/69508326-8863-45dc-b47f-2cce3ce54785)
+3_cpd_analysis_pipeline    |  3h | $50.67 (~$12.67 per plate) |[Jan 22, 2023, 8:13 AM](https://app.terra.bio/#workspaces/bayer-pcl-cell-imaging/cellpainting/job_history/0b5b4039-ce25-4ebb-ac1b-3b18b4777a49)
+4_cytomining               |  6h | $1.65 (~$0.41 per plate)   |[Jan 22, 2023, 11:13 AM](https://app.terra.bio/#workspaces/bayer-pcl-cell-imaging/cellpainting/job_history/3e44ad8e-eb27-4a26-a0d1-ac341b14dcb7)
 
 
 **Note:** you may want to uncheck the "use call caching" box if your workflow run completes immediately because the particular plate has been previously analyzed with the workflow.
