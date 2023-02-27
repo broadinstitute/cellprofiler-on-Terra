@@ -7,7 +7,7 @@ Works well in Terra, and will also work on any Cromwell server that can run WDLs
 Currently specific to a Google Cloud backend.  (We are open to supporting more 
 backends, specifically cloud storage locations, in the future, including AWS and Azure.)
 
-You can **see these workflows in action** and **try them yourself** in [Terra workspace cellpainting](https://app.terra.bio/#workspaces/bayer-pcl-cell-imaging/cellpainting)!
+You can **see these workflows in action** and **try them yourself** in [Terra workspace cellpainting](https://app.terra.bio/#workspaces/cell-imaging/cellpainting)!
 
 ## Three pipelines:
 
@@ -41,4 +41,4 @@ These workflows are all publicly available, and
 From there, you can import and run the workflows in [Terra](https://app.terra.bio) or any other 
 place you like to run [WDL workflows](https://github.com/openwdl/wdl).
 
-You can clone the Terra workspace [cellpainting](https://app.terra.bio/#workspaces/bayer-pcl-cell-imaging/cellpainting), which is conveniently preconfigured to run on three plates of sample data, if you just want to give it a try.
+You can clone the Terra workspace [cellpainting](https://app.terra.bio/#workspaces/cell-imaging/cellpainting), which is conveniently preconfigured to run on three plates of sample data, if you just want to give it a try.
