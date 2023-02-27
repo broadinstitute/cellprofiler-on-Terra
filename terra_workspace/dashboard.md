@@ -50,11 +50,11 @@ Sample data consist of a set of 4x 384 well plates, 9 fields of views per well a
 
 Workflow name                 |Time |Batch Cost (Cost per plate) |View a completed run of this workflow
 ------------------------------|-----|----------------------------|-------------------------------------
-0_create_load_data            | 15m | $0.03                      |[Jan 19, 2023, 1:36 PM](https://app.terra.bio/#workspaces/bayer-pcl-cell-imaging/cellpainting/job_history/6e382af8-0503-44dc-8145-ae98538ee128)
+0_create_load_data            | 15m | $0.01                      |[Feb 24, 2023, 3:49 PM](https://app.terra.bio/#workspaces/cell-imaging/cellpainting/job_history/79c579d9-d805-495d-998e-dad959195826)
 1_cpd_max_projection_pipeline | N/A |                        N/A | max projection adjustment was not needed for this particular sample data
-2_cp_illumination_pipeline.   | 10h | $2.64 (~$0.66 per plate)   |[Jan 19, 2023, 1:55 PM](https://app.terra.bio/#workspaces/bayer-pcl-cell-imaging/cellpainting/job_history/69508326-8863-45dc-b47f-2cce3ce54785)
-3_cpd_analysis_pipeline       |  3h | $50.67 (~$12.67 per plate) |[Jan 22, 2023, 8:13 AM](https://app.terra.bio/#workspaces/bayer-pcl-cell-imaging/cellpainting/job_history/0b5b4039-ce25-4ebb-ac1b-3b18b4777a49)
-4_cytomining                  |  6h | $1.65 (~$0.41 per plate)   |[Jan 22, 2023, 11:13 AM](https://app.terra.bio/#workspaces/bayer-pcl-cell-imaging/cellpainting/job_history/3e44ad8e-eb27-4a26-a0d1-ac341b14dcb7)
+2_cp_illumination_pipeline.   | 10h | $2.68 (~$0.67 per plate)   |[Feb 24, 2023, 4:07 PM](https://app.terra.bio/#workspaces/cell-imaging/cellpainting/job_history/2eed6a96-2edd-4a60-b122-06447b97562e)
+3_cpd_analysis_pipeline       |  3h | $51.67 (~$12.92 per plate) |[Feb 25, 2023, 8:27 AM](https://app.terra.bio/#workspaces/cell-imaging/cellpainting/job_history/3061b2c3-e9c0-401e-9cbf-29573ecb262b)
+4_cytomining                  |  6h | $1.59 (~$0.40 per plate)   |[Feb 25, 2023, 2:30 PM](https://app.terra.bio/#workspaces/cell-imaging/cellpainting/job_history/d71e0793-c372-4f5b-8a83-f0d4a314139b)
 
 
 **Notes:**
