@@ -116,9 +116,15 @@ task profiling {
     from pycytominer.cyto_utils import infer_cp_features
     from pycytominer import normalize, annotate
 
+    IMAGE_FEATURE_CATEGORIES = ["Intensity", "Granularity", "Texture", "ImageQuality", "Count", "Threshold"]
+
     print("Creating Single Cell class... ")
     start = time.time()
-    sc = SingleCells('sqlite:///~{plate_id}.sqlite',aggregation_operation='~{aggregation_operation}')
+    sc = SingleCells(
+        'sqlite:///~{plate_id}.sqlite',
+        aggregation_operation='~{aggregation_operation}',
+        add_image_features=True,
+        image_feature_categories=IMAGE_FEATURE_CATEGORIES)
     print("Time: " + str(time.time() - start))
 
     print("Aggregating profiles... ")
