@@ -59,12 +59,14 @@ CellProfiler methods team recommends the following plate to use from [their rece
 The validation data was created using a different approach than these Cromwell workflows, so there are a few expected differences that you will observe
 when comparing workflow results to the validation data:
 1. The `cp_illumination_pipeline.wdl` and `cpd_analysis_pipeline.wdl` workflows require load data files created by workflow `create_load_data.wdl` so that they
-contain Cromwell-localized paths. The preexisting load data files
+contain Cromwell-localized paths.
+    * Use of the preexisting load data files
 [`s3://cellpainting-gallery/cpg0016-jump/source_4/workspace/load_data_csv/2021_07_12_Batch8/BR00125638/`](https://open.quiltdata.com/b/cellpainting-gallery/tree/cpg0016-jump/source_4/workspace/load_data_csv/2021_07_12_Batch8/BR00125638/)
-might cause the images to be localized twice, and also are missing columns for the Brightfield images that are needed by the CellProfiler cppipe files.
+might cause the images to be localized twice.
+    * The preexisting load data files are also missing columns for the Brightfield images that are referenced by the specific CellProfiler cppipe files used to process the validation data.
 2. Output files from `cpd_analysis_pipeline.wdl` are per-well from the workflow, instead of per-site in the validation data.
     * The validation data has `BR00125638/analysis/BR00125638-A01-1/Cells.csv`, `BR00125638/analysis/BR00125638-A01-2/Cells.csv`, etc.
     * The workflow has `BR00125638/A01/Cells.csv`
     * The `ImageNumber` column in the workflow results will have values from 1 to 9, whereas a different image numbering scheme is present in the per-site files.
-3. The `cytomining.wdl` workflow performs annotation with a plate map but the validation data was not annotated. Just omit those extra annotation
- columns when comparing validation file `BR00125638.csv` to workflow result `BR00125638_annotated_mean.csv`.
+3. The `cytomining.wdl` workflow performs annotation with a plate map, but the validation data was not annotated.
+    * Just omit those extra annotation columns when comparing validation file `BR00125638.csv` to workflow result `BR00125638_annotated_mean.csv`.
