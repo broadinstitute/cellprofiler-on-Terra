@@ -1,5 +1,5 @@
 {
-  "create_load_data.config_yaml": "TBD S3 location of config.yaml",
+  "create_load_data.config_yaml": "S3 location of config.yaml, use the yaml config shown on the README.md accompanying this file in source control",
   "create_load_data.destination_directory_gsurl": "set your S3 output location",
   "create_load_data.images_directory_gsurl": "s3://cellpainting-gallery/cpg0016-jump/source_4/images/2021_07_12_Batch8/images/BR00125638__2021-07-17T15_13_21-Measurement1/Images/",
   "create_load_data.plate_id":  "BR00125638"
