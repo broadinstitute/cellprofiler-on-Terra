@@ -2,5 +2,6 @@
   "cp_illumination_pipeline.cppipe_file": "an S3 copy of https://github.com/broadinstitute/imaging-platform-pipelines/blob/master/JUMP_production/JUMP_illum_LoadData_v1.cppipe",
   "cp_illumination_pipeline.images_directory_gsurl": "s3://cellpainting-gallery/cpg0016-jump/source_4/images/2021_07_12_Batch8/images/BR00125638__2021-07-17T15_13_21-Measurement1/Images/",
   "cp_illumination_pipeline.load_data": "s3://cellpainting-gallery/cpg0016-jump/source_4/workspace/load_data_csv/2021_07_12_Batch8/BR00125638/load_data.csv.gz",
-  "cp_illumination_pipeline.output_illum_directory_gsurl": "set your S3 output location, the files written there should match s3://cellpainting-gallery/cpg0016-jump/source_4/images/2021_07_12_Batch8/illum/BR00125638/"
+  "cp_illumination_pipeline.output_illum_directory_gsurl": "set your S3 output location, the files written there should match s3://cellpainting-gallery/cpg0016-jump/source_4/images/2021_07_12_Batch8/illum/BR00125638/",
+  "cpd_analysis_pipeline.cellprofiler.cellprofiler_docker_image": "cellprofiler/cellprofiler:4.1.3"
 }
