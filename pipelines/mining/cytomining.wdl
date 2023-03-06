@@ -19,6 +19,8 @@ task profiling {
 
     # Pycytominer aggregation step
     String aggregation_operation = "mean"
+    Boolean add_image_features = false
+    Array[String] image_feature_categories = ["Intensity", "Granularity", "Texture", "ImageQuality", "Count", "Threshold"]
 
     # Pycytominer annotation step
     File plate_map_file
@@ -116,14 +118,14 @@ task profiling {
     from pycytominer.cyto_utils import infer_cp_features
     from pycytominer import normalize, annotate
 
-    IMAGE_FEATURE_CATEGORIES = ["Intensity", "Granularity", "Texture", "ImageQuality", "Count", "Threshold"]
+    IMAGE_FEATURE_CATEGORIES = ["~{sep='","' image_feature_categories}"]
 
     print("Creating Single Cell class... ")
     start = time.time()
     sc = SingleCells(
         'sqlite:///~{plate_id}.sqlite',
         aggregation_operation='~{aggregation_operation}',
-        add_image_features=True,
+        add_image_features=~{if add_image_features then "True" else "False"},
         image_feature_categories=IMAGE_FEATURE_CATEGORIES)
     print("Time: " + str(time.time() - start))
 
