@@ -79,9 +79,9 @@ might cause the images to be localized twice.
     
 ### Validation results
 
-Workflow name                  |        Cloud | Result | Details
--------------------------------|--------------|--------|--------
- `cp_illumination_pipeline.wdl`| [GCP](./gcp) | resulting files match exactly per MD5 | [test run](https://app.terra.bio/#workspaces/vts-playground/jump-cp-workflow-validation/job_history/3644b222-be0a-423a-adfe-865645969d69), see result comparison in `gsutil cp gs://fc-9adb1668-2d2f-4269-8543-ee0d240dabc6/reports/deflaux@google.com/20230306/183356/compare_illumination_correction_results.html .`
- `cpd_analysis_pipeline.wdl`   | [GCP](./gcp) | values within the result files match, with the noted caveats | [test job](https://app.terra.bio/#workspaces/vts-playground/jump-cp-workflow-validation/job_history/ce9a8103-e41e-4d3b-9ea6-9f7bc53314c2), see result comparison in `gsutil cp gs://fc-9adb1668-2d2f-4269-8543-ee0d240dabc6/reports/deflaux@google.com/20230301/221137/compare_analysis_results.html .`
- `cytomining.wdl`              | [GCP](./gcp) | after [PR82](https://github.com/broadinstitute/cellprofiler-on-Terra/pull/82) values within the result files match, with the noted caveats | [test job](https://app.terra.bio/#workspaces/vts-playground/jump-cp-workflow-validation/job_history/9a3e2872-4751-44af-a4c4-b2d7ed3eb87e), see result comparison in `gsutil cp gs://fc-9adb1668-2d2f-4269-8543-ee0d240dabc6/reports/deflaux@google.com/20230301/221137/compare_cytomining_results.html .` 
+Workflow name               |        Cloud | Result | Details
+----------------------------|--------------|--------|--------
+cp_illumination_pipeline.wdl| [GCP](./gcp) | resulting files match exactly per MD5 | [test run](https://app.terra.bio/#workspaces/vts-playground/jump-cp-workflow-validation/job_history/3644b222-be0a-423a-adfe-865645969d69), see result comparison in `gsutil cp gs://fc-9adb1668-2d2f-4269-8543-ee0d240dabc6/reports/deflaux@google.com/20230306/183356/compare_illumination_correction_results.html .`
+cpd_analysis_pipeline.wdl   | [GCP](./gcp) | values within the result files match, with the noted caveats | [test run](https://app.terra.bio/#workspaces/vts-playground/jump-cp-workflow-validation/job_history/ce9a8103-e41e-4d3b-9ea6-9f7bc53314c2), see result comparison in `gsutil cp gs://fc-9adb1668-2d2f-4269-8543-ee0d240dabc6/reports/deflaux@google.com/20230306/194134/compare_analysis_results.html .`
+cytomining.wdl              | [GCP](./gcp) | after [PR82](https://github.com/broadinstitute/cellprofiler-on-Terra/pull/82) values within the result files match, with the noted caveats | [test run](https://app.terra.bio/#workspaces/vts-playground/jump-cp-workflow-validation/job_history/7cf92cf5-79e3-420e-a4dd-570099a7449a), see result comparison in `gsutil cp gs://fc-9adb1668-2d2f-4269-8543-ee0d240dabc6/reports/deflaux@google.com/20230307/171223/compare_cytomining_results.html .` 
 

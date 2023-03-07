@@ -2,5 +2,6 @@
   "cytomining.cellprofiler_analysis_directory_gsurl": "s3://cellpainting-gallery/cpg0016-jump/source_4/workspace/analysis/2021_07_12_Batch8/BR00125638/analysis/",
   "cytomining.output_directory_gsurl": "set your S3 output location, the files written there should match s3://cellpainting-gallery/cpg0016-jump/source_4/workspace/backend/2021_07_12_Batch8/BR00125638/",
   "cytomining.plate_id": "BR00125638",
-  "cytomining.plate_map_file": "s3://cellpainting-gallery/cpg0016-jump/source_4/workspace/metadata/filename_TBD"
+  "cytomining.plate_map_file": "TBD the correct plate map for this plate, but for now use an S3 copy of https://github.com/jump-cellpainting/JUMP-Target/blob/master/JUMP-Target-1_compound_platemap.tsv",
+  "cytomining.profiling.add_image_features":"${true}"
 }
