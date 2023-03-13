@@ -27,7 +27,7 @@ task gsutil_ls {
   }
 
   runtime {
-    docker: "us.gcr.io/broad-dsde-methods/google-cloud-sdk:alpine"
+    docker: "gcr.io/google.com/cloudsdktool/google-cloud-cli:alpine"
     disks: "local-disk 50 HDD"
     memory: "15G"
     cpu: 4
@@ -58,7 +58,7 @@ task gsutil_ls_to_file{
   }
 
   runtime {
-    docker: "us.gcr.io/broad-dsde-methods/google-cloud-sdk:alpine" # Docker image with gsutil
+    docker: "gcr.io/google.com/cloudsdktool/google-cloud-cli:alpine" # Docker image with gsutil
     disks: "local-disk 50 HDD"
     memory: "15G"
     cpu: 4
@@ -86,7 +86,7 @@ task gsutil_delocalize {
   }
 
   runtime {
-    docker: "us.gcr.io/broad-dsde-methods/google-cloud-sdk:alpine"
+    docker: "gcr.io/google.com/cloudsdktool/google-cloud-cli:alpine"
     disks: "local-disk 500 HDD"
     memory: "15G"
     cpu: 4
@@ -320,7 +320,7 @@ task extract_and_gsutil_rsync {
   }
 
   runtime {
-    docker: "us.gcr.io/broad-dsde-methods/google-cloud-sdk:alpine"
+    docker: "gcr.io/google.com/cloudsdktool/google-cloud-cli:alpine"
     disks: "local-disk 50 HDD"
     memory: "15G"
     cpu: 4
@@ -503,7 +503,7 @@ task gcloud_is_bucket_writable {
   }
 
   runtime {
-    docker: "us.gcr.io/broad-dsde-methods/google-cloud-sdk:alpine"
+    docker: "gcr.io/google.com/cloudsdktool/google-cloud-cli:alpine"
     disks: "local-disk 50 HDD"
     memory: "2G"
     cpu: 1
