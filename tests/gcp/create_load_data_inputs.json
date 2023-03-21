@@ -1,0 +1,6 @@
+{
+  "create_load_data.config_yaml": "gs://fc-9adb1668-2d2f-4269-8543-ee0d240dabc6/pe2loaddata_config/chandrasekaran_config.yml",
+  "create_load_data.destination_directory_gsurl": "set your GCS output location",
+  "create_load_data.images_directory_gsurl": "gs://fc-9adb1668-2d2f-4269-8543-ee0d240dabc6/cpg0016-jump/source_4/images/2021_07_12_Batch8/images/BR00125638__2021-07-17T15_13_21-Measurement1/Images/",
+  "create_load_data.plate_id":  "BR00125638"
+}

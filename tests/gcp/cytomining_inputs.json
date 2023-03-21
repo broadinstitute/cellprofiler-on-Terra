@@ -1,0 +1,7 @@
+{
+  "cytomining.cellprofiler_analysis_directory_gsurl": "gs://fc-9adb1668-2d2f-4269-8543-ee0d240dabc6/cpg0016-jump/source_4/workspace/analysis/2021_07_12_Batch8/BR00125638/analysis/",
+  "cytomining.output_directory_gsurl": "set your GCS output location, the files written there should match s3://cellpainting-gallery/cpg0016-jump/source_4/workspace/backend/2021_07_12_Batch8/BR00125638/",
+  "cytomining.plate_id": "BR00125638",
+  "cytomining.plate_map_file": "TBD the correct plate map for this plate, but for now use a GCS copy of https://github.com/jump-cellpainting/JUMP-Target/blob/master/JUMP-Target-1_compound_platemap.tsv",
+  "cytomining.profiling.add_image_features":"${true}"
+}

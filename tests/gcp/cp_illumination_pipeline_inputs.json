@@ -1,0 +1,7 @@
+{
+  "cp_illumination_pipeline.cppipe_file": "gs://fc-9adb1668-2d2f-4269-8543-ee0d240dabc6/cellprofiler_pipelines/JUMP_illum_LoadData_v1.cppipe",
+  "cp_illumination_pipeline.images_directory_gsurl": "gs://fc-9adb1668-2d2f-4269-8543-ee0d240dabc6/cpg0016-jump/source_4/images/2021_07_12_Batch8/images/BR00125638__2021-07-17T15_13_21-Measurement1/Images/",
+  "cp_illumination_pipeline.load_data": "GCS path to file load_data.csv from output parameter create_load_data.load_data_csv",
+  "cp_illumination_pipeline.output_illum_directory_gsurl": "set your GCS output location, the files written there should match s3://cellpainting-gallery/cpg0016-jump/source_4/images/2021_07_12_Batch8/illum/BR00125638/",
+  "cp_illumination_pipeline.cellprofiler.cellprofiler_docker_image": "cellprofiler/cellprofiler:4.1.3"
+}
