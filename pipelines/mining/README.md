@@ -147,6 +147,7 @@ For comprehensive overview, see the following full example:
 ```console
 (cromwell) $ ls
 data/
+cytomining.wdl
 inputs.json
 options.json
 
@@ -206,22 +207,32 @@ A02/outlines/A02_s1--cell_outlines.png
 
 (cromwell) $ ls
 data/
+cytomining.wdl
+files.tar.gz
 inputs.json
 options.json
-files.tar.gz
 
 (cromwell) $ cromwell run cytomining.wdl -i inputs.json -o options.json
 <LOTS OF LOGS! ... wait until the task completes ...>
 
 (cromwell) $ ls
+cromwell-executions/
+cromwell-workflow-logs/
 cromwell_outputs/
 data/
+cytomining.wdl
+files.tar.gz
 inputs.json
 options.json
-files.tar.gz
 
 (cromwell) $ ls cromwell_outputs/
-
+BR00116991.sqlite
+BR00116991_annotated_mean.csv
+BR00116991_normalized_mean.csv
+monitoring.log
+stdout
+call_logs/
+wf_logs/
 
 (cromwell) $ rm -r cromwell-*
 
