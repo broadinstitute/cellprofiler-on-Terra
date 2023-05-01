@@ -12,7 +12,7 @@ task profiling {
 
     input {
         # Input files
-        String? cellprofiler_analysis_directory
+        String? cellprofiler_analysis_directory_gsurl
         File? cellprofiler_analysis_tarball
         String plate_id
         String sqlite_file = ""
@@ -39,7 +39,7 @@ task profiling {
     }
 
     # Ensure no trailing slashes
-    String cellprofiler_analysis_dir = sub(select_first([cellprofiler_analysis_directory, ""]), "/+$", "")
+    String cellprofiler_analysis_dir = sub(select_first([cellprofiler_analysis_directory_gsurl, ""]), "/+$", "")
     String output_directory = sub(output_directory_gsurl, "/+$", "")
 
     # Output filenames:
@@ -222,7 +222,7 @@ task profiling {
 
 workflow cytomining {
     input {
-        String? cellprofiler_analysis_directory = ""
+        String? cellprofiler_analysis_directory_gsurl
         String? cellprofiler_analysis_tarball
         String plate_id
 
@@ -259,7 +259,7 @@ workflow cytomining {
         if (!use_tarball) {
             call profiling as profiling_gsurl {
                 input:
-                    cellprofiler_analysis_directory = cellprofiler_analysis_directory,
+                    cellprofiler_analysis_directory_gsurl = cellprofiler_analysis_directory_gsurl,
                     plate_id = plate_id,
                     plate_map_file = plate_map_file,
                     output_directory_gsurl = output_directory_gsurl,
