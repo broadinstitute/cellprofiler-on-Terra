@@ -1,6 +1,9 @@
 # Mac
 .DS_Store
 
+# Data files
+data/*
+
 # Cromwell / womtool generated files to submit jobs
 .dot
 .inputs
